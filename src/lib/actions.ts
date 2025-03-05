@@ -7,17 +7,17 @@ import { generateReferencesWithAnthropic, generateReferencesWithOpenAI } from ".
 // Demo mode references with pre-calculated confidence scores
 const demoReferences: ReferenceResult[] = [
   {
-    ...customerReferences[1], // TechSolutions Inc
+    ...customerReferences[1]!,
     confidence: 95,
-  },
+  } as ReferenceResult,
   {
-    ...customerReferences[3], // EduTech Learning
+    ...customerReferences[3]!,
     confidence: 87,
-  },
+  } as ReferenceResult,
   {
-    ...customerReferences[8], // Healthcare Solutions
+    ...customerReferences[8]!,
     confidence: 78,
-  },
+  } as ReferenceResult,
 ]
 
 // Update the findReferences function to use the specified AI provider
@@ -35,23 +35,31 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
   let filteredReferences = customerReferences.filter((ref) => ref.approvedForPublicUse)
 
   if (filters.industry) {
+    const industry = filters.industry;
     filteredReferences = filteredReferences.filter(
-      (ref) => ref.industry.toLowerCase() === filters.industry.toLowerCase(),
+      (ref) => ref.industry.toLowerCase() === industry.toLowerCase(),
     )
   }
 
   if (filters.marketSegment) {
+    const marketSegment = filters.marketSegment;
     filteredReferences = filteredReferences.filter(
-      (ref) => ref.marketSegment.toLowerCase() === filters.marketSegment.toLowerCase(),
+      (ref) => ref.marketSegment.toLowerCase() === marketSegment.toLowerCase(),
     )
   }
 
   if (filters.useCase) {
-    filteredReferences = filteredReferences.filter((ref) => ref.useCase.toLowerCase() === filters.useCase.toLowerCase())
+    const useCase = filters.useCase;
+    filteredReferences = filteredReferences.filter(
+      (ref) => ref.useCase.toLowerCase() === useCase.toLowerCase()
+    )
   }
 
   if (filters.crmType) {
-    filteredReferences = filteredReferences.filter((ref) => ref.crm.toLowerCase() === filters.crmType.toLowerCase())
+    const crmType = filters.crmType;
+    filteredReferences = filteredReferences.filter(
+      (ref) => ref.crm.toLowerCase() === crmType.toLowerCase()
+    )
   }
 
   try {
