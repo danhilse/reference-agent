@@ -69,8 +69,8 @@ export default function ReferenceSearch() {
     }
   };
 
-  const copyToClipboard = (index: number, text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (index: number, text: string) => {
+    await navigator.clipboard.writeText(text);
     setCopied(index);
     setTimeout(() => setCopied(null), 2000);
   };
@@ -89,8 +89,8 @@ export default function ReferenceSearch() {
       .join("");
   };
 
-  const copyAllToClipboard = () => {
-    navigator.clipboard.writeText(formatResultsForCopy());
+  const copyAllToClipboard = async () => {
+    await navigator.clipboard.writeText(formatResultsForCopy());
     setCopied(-1);
     setTimeout(() => setCopied(null), 2000);
   };
