@@ -2,6 +2,22 @@ import { generateText } from "ai"
 import { anthropic } from "@ai-sdk/anthropic"
 import { openai } from "@ai-sdk/openai"
 import type { CustomerReference, ReferenceResult } from "./types"
+import { env } from "~/env.js"
+import { aiConfig } from "./ai-config"
+
+// Extract only the fields needed for matching to reduce token usage
+function prepareReferencesForAI(references: CustomerReference[]) {
+  return references.map((ref, index) => ({
+    id: index, // Use array index as a simple id for matching back
+    customerName: ref.customerName,
+    industry: ref.industry,
+    marketSegment: ref.marketSegment,
+    useCase: ref.useCase,
+    capability: ref.capability,
+    referenceDetail: ref.referenceDetail,
+    crm: ref.crm,
+  }))
+}
 
 // Function to generate references using Anthropic
 export async function generateReferencesWithAnthropic(
@@ -9,37 +25,60 @@ export async function generateReferencesWithAnthropic(
   references: CustomerReference[],
 ): Promise<ReferenceResult[]> {
   try {
-    // Format the references as JSON string
-    const referencesJson = JSON.stringify(references, null, 2)
+    // Prepare simplified reference data for AI
+    const simplifiedReferences = prepareReferencesForAI(references)
+    
+    // Format the simplified references as JSON string
+    const referencesJson = JSON.stringify(simplifiedReferences, null, 2)
 
-    // Create the prompt for Anthropic
+    // Create a more detailed prompt for Anthropic
     const prompt = `
-Find the most relevant customer references based on this description: "${description}".
+You are an expert sales assistant for Act-On Software, a marketing automation platform.
+Your task is to find the most relevant customer references based on this sales rep's request: "${description}".
 
 Available customer references:
 ${referencesJson}
 
-Return only the most relevant 3-5 references as a valid JSON array. Each object in the array should have all the properties from the original reference plus a "confidence" field with a number between 0-100 indicating how well it matches the request.
+I need you to:
+1. Identify the 3-5 most relevant customer references that best match the sales rep's needs.
+2. Assign a confidence score (0-100) to each match, indicating how well it addresses the request.
+3. Only include references that are truly relevant to the request.
 
-Only include references where "approvedForPublicUse" is true.
+Return your response as a JSON array of objects with these properties:
+- id: The reference ID (number)
+- confidence: Your confidence score (number between 0-100)
 
-If no suitable matches are found, return an empty array.
+Example output format:
+[
+  {"id": 2, "confidence": 95},
+  {"id": 0, "confidence": 82},
+  {"id": 5, "confidence": 78}
+]
+
+IMPORTANT: Return ONLY the JSON array with NO additional text, explanation, or markdown formatting.
 `
 
-    // Call Anthropic API
+    // Call Anthropic API using config values
     const { text } = await generateText({
-      model: anthropic("claude-3-haiku-20240307"),
+      model: anthropic(aiConfig.anthropic.model),
       prompt,
-      temperature: 0.2,
-      maxTokens: 4000,
+      temperature: aiConfig.anthropic.temperature,
+      maxTokens: aiConfig.anthropic.maxTokens,
     })
 
-    // Parse the response
+    // Parse the response and map back to full reference objects
     try {
-      const parsedResults = JSON.parse(text) as ReferenceResult[]
-      return parsedResults
+      const parsedMatches = JSON.parse(text)
+      
+      // Transform the minimal matches back to full ReferenceResult objects
+      const results = parsedMatches.map((match: { id: number; confidence: number }) => ({
+        ...references[match.id],
+        confidence: match.confidence
+      })) as ReferenceResult[]
+      
+      return results
     } catch (error) {
-      console.error("Failed to parse Anthropic response:", error)
+      console.error("Failed to parse Anthropic response:", error, "Raw response:", text)
       return []
     }
   } catch (error) {
@@ -54,37 +93,60 @@ export async function generateReferencesWithOpenAI(
   references: CustomerReference[],
 ): Promise<ReferenceResult[]> {
   try {
-    // Format the references as JSON string
-    const referencesJson = JSON.stringify(references, null, 2)
+    // Prepare simplified reference data for AI
+    const simplifiedReferences = prepareReferencesForAI(references)
+    
+    // Format the simplified references as JSON string
+    const referencesJson = JSON.stringify(simplifiedReferences, null, 2)
 
-    // Create the prompt for OpenAI
+    // Create a more detailed prompt for OpenAI
     const prompt = `
-Find the most relevant customer references based on this description: "${description}".
+You are an expert sales assistant for Act-On Software, a marketing automation platform.
+Your task is to find the most relevant customer references based on this sales rep's request: "${description}".
 
 Available customer references:
 ${referencesJson}
 
-Return only the most relevant 3-5 references as a valid JSON array. Each object in the array should have all the properties from the original reference plus a "confidence" field with a number between 0-100 indicating how well it matches the request.
+I need you to:
+1. Identify the 3-5 most relevant customer references that best match the sales rep's needs.
+2. Assign a confidence score (0-100) to each match, indicating how well it addresses the request.
+3. Only include references that are truly relevant to the request.
 
-Only include references where "approvedForPublicUse" is true.
+Return your response as a JSON array of objects with these properties:
+- id: The reference ID (number)
+- confidence: Your confidence score (number between 0-100)
 
-If no suitable matches are found, return an empty array.
+Example output format:
+[
+  {"id": 2, "confidence": 95},
+  {"id": 0, "confidence": 82},
+  {"id": 5, "confidence": 78}
+]
+
+IMPORTANT: Return ONLY the JSON array with NO additional text, explanation, or markdown formatting.
 `
 
-    // Call OpenAI API
+    // Call OpenAI API using config values
     const { text } = await generateText({
-      model: openai("gpt-4o"),
+      model: openai(aiConfig.openai.model),
       prompt,
-      temperature: 0.2,
-      maxTokens: 4000,
+      temperature: aiConfig.openai.temperature,
+      maxTokens: aiConfig.openai.maxTokens,
     })
 
-    // Parse the response
+    // Parse the response and map back to full reference objects
     try {
-      const parsedResults = JSON.parse(text) as ReferenceResult[]
-      return parsedResults
+      const parsedMatches = JSON.parse(text)
+      
+      // Transform the minimal matches back to full ReferenceResult objects
+      const results = parsedMatches.map((match: { id: number; confidence: number }) => ({
+        ...references[match.id],
+        confidence: match.confidence
+      })) as ReferenceResult[]
+      
+      return results
     } catch (error) {
-      console.error("Failed to parse OpenAI response:", error)
+      console.error("Failed to parse OpenAI response:", error, "Raw response:", text)
       return []
     }
   } catch (error) {
@@ -92,4 +154,3 @@ If no suitable matches are found, return an empty array.
     throw error
   }
 }
-

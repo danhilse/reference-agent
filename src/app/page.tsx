@@ -3,8 +3,8 @@ import ReferenceSearch from "~/components/reference-search";
 
 export default function Home() {
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="mx-auto max-w-4xl">
+    <main className="min-h-screen bg-[var(--app-background)]">
+      <div className="container-acton py-8">
         <div className="mb-8 flex flex-col items-center gap-6">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-QeR7XHkv78gXqGGllmqPRBmwwBJUl5.svg"
@@ -14,8 +14,8 @@ export default function Home() {
             priority
           />
           <div className="text-center">
-            <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
-              Reference Search
+            <h1 className="text-2xl font-semibold text-[var(--text)]">
+              Customer Reference Agent
             </h1>
             <p className="mt-1 text-[var(--text-light)]">
               Find customer quotes and references for sales conversations
