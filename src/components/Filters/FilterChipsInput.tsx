@@ -34,6 +34,8 @@ interface FilterChipsInputProps {
   placeholder: string;
   required?: boolean;
   filtersHook: ReturnType<typeof useFilters>;
+  onFocus?: () => void; // New prop for handling focus
+  onBlur?: () => void; // New prop for handling blur
 }
 
 const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
@@ -42,6 +44,8 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   placeholder,
   required = false,
   filtersHook,
+  onFocus,
+  onBlur,
 }) => {
   const { filters, toggleFilter, removeFilter, hasFilters } = filtersHook;
 
@@ -74,6 +78,15 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
     setMainPopoverOpen(false);
   };
 
+  // Handle focus and blur events
+  const handleFocus = () => {
+    if (onFocus) onFocus();
+  };
+
+  const handleBlur = () => {
+    if (onBlur) onBlur();
+  };
+
   // Auto-resize textarea based on content and filter section height
   useEffect(() => {
     if (textareaRef.current && filterSectionRef.current) {
@@ -94,13 +107,13 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   }, [value, filters]); // Re-run when filters change too
 
   return (
-    <div className="relative overflow-hidden rounded-md border focus-within:ring-2 focus-within:ring-ring focus:border-transparent">
+    <div className="relative overflow-hidden rounded-lg border focus-within:ring-2 focus-within:ring-ring focus:border-transparent">
       {/* Text input section */}
       <textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder="" // Empty because we're using our custom overlay placeholder
         className="w-full resize-none px-3 py-2 text-sm outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
         style={{
           minHeight: "100px",
@@ -108,6 +121,8 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
           // paddingBottom will be dynamically set in the useEffect
         }}
         required={required}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
 
       {/* Filter section - always present */}
@@ -173,9 +188,9 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
               variant="ghost"
               size="xs"
               className={cn(
-                "h-6 rounded-full border-gray-300 text-xs transition-all duration-300 hover:bg-white hover:text-gray-600",
+                "h-6 rounded-full border-gray-300 px-1 text-xs transition-all duration-300 hover:bg-white hover:text-gray-500",
                 (isHoveringFilter || mainPopoverOpen) &&
-                  "border bg-gray-100 text-gray-600",
+                  "border bg-gray-100 px-2 text-gray-500",
               )}
               onMouseEnter={() => setIsHoveringFilter(true)}
               onMouseLeave={() => {

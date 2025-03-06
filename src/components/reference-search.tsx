@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Check, Copy, Loader2, Info } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -27,9 +27,20 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
-export default function ImprovedReferenceSearch() {
+interface ReferenceSearchProps {
+  demoMode: boolean;
+  aiProvider: "anthropic" | "openai";
+}
+
+export default function ImprovedReferenceSearch({
+  demoMode,
+  aiProvider,
+}: ReferenceSearchProps) {
   // State for query input
   const [description, setDescription] = useState("");
+
+  // Track input focus state
+  const [isFocused, setIsFocused] = useState(false);
 
   // Use our custom filter hook
   const filtersHook = useFilters();
@@ -43,15 +54,18 @@ export default function ImprovedReferenceSearch() {
   const [hasSearched, setHasSearched] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
 
-  // Feature toggles
-  const [demoMode, setDemoMode] = useState(false);
-  const [aiProvider, setAiProvider] = useState<"anthropic" | "openai">(
-    "anthropic",
-  );
-
   // Handle placeholder updates
   const handlePlaceholderChange = (newPlaceholder: string) => {
     setPlaceholder(newPlaceholder);
+  };
+
+  // Focus handlers for the input
+  const handleInputFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleInputBlur = () => {
+    setIsFocused(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,13 +75,20 @@ export default function ImprovedReferenceSearch() {
     setResults(null);
 
     try {
+      // Add a minimum delay for better UX with staggered loading
       const filterValues = filtersHook.getFilterValues();
-      const references = await findReferences({
-        description,
-        filters: filterValues,
-        demoMode,
-        aiProvider,
-      });
+
+      // Use Promise.all to run both the delay and the API call in parallel
+      const [references] = await Promise.all([
+        findReferences({
+          description,
+          filters: filterValues,
+          demoMode,
+          aiProvider,
+        }),
+        // Minimum display time for loading state to allow staggered animation to show
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
 
       setResults(references);
     } catch (error) {
@@ -98,129 +119,140 @@ export default function ImprovedReferenceSearch() {
   };
 
   return (
-    <div className="min-w-[620px] space-y-6">
-      {/* Include the RotatingPlaceholder component */}
-      <RotatingPlaceholder onPlaceholderChange={handlePlaceholderChange} />
+    <div className="container mx-auto transition-all duration-500 ease-in-out">
+      {/* Main layout container - transitions from centered to side-by-side */}
+      <div
+        className={`mx-auto flex gap-6 ${hasSearched ? "lg:mx-0 lg:flex-row lg:items-start" : "flex-col items-center"} transition-all duration-500 ease-in-out`}
+      >
+        {/* Query Card - becomes sticky when results are shown but maintains width */}
+        <div
+          className={` ${
+            hasSearched ? "lg:sticky lg:top-6" : ""
+          } w-full min-w-[380px] max-w-[440px] transition-all duration-500 ease-in-out`}
+        >
+          {/* Pass the required props to RotatingPlaceholder */}
+          <RotatingPlaceholder
+            onPlaceholderChange={handlePlaceholderChange}
+            inputValue={description}
+            isFocused={isFocused}
+          />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Find References</CardTitle>
-          <CardDescription>
-            Search our customer reference database
-          </CardDescription>
-          {/* Demo mode toggle with tooltip */}
-          <div className="absolute right-4 top-4 flex items-center space-x-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="demo-mode"
-                      checked={demoMode}
-                      onCheckedChange={setDemoMode}
-                    />
-                    <Label
-                      htmlFor="demo-mode"
-                      className="flex items-center text-sm text-muted-foreground"
-                    >
-                      Demo Mode
-                      <Info className="ml-1 h-3 w-3" />
-                    </Label>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    Generate realistic reference examples instantly without
-                    calling the AI API
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="description">What are you looking for?</Label>
-
-              {/* Use our simplified FilterChipsInput component */}
-              <FilterChipsInput
-                value={description}
-                onChange={setDescription}
-                placeholder={placeholder}
-                filtersHook={filtersHook}
-                required={!demoMode}
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Finding references...
-                </>
-              ) : (
-                "Find References"
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-
-      {/* Show results container whenever a search has been initiated */}
-      {hasSearched && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Results</CardTitle>
+          <Card>
+            <CardHeader className="ml-1">
+              <CardTitle>Find References</CardTitle>
               <CardDescription>
-                {isLoading
-                  ? "Searching for references..."
-                  : results && results.length > 0
-                    ? `Found ${results.length} matching references${
-                        demoMode ? " (Demo Mode)" : ""
-                      }`
-                    : "No matching references found"}
+                Search our customer reference database
               </CardDescription>
-            </div>
-            {results && results.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyAllToClipboard}
-                className="flex items-center gap-1"
-              >
-                {copiedAll ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-                Copy All
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isLoading ? (
-              <LoadingState />
-            ) : results && results.length > 0 ? (
-              results.map((result, index) => (
-                <ReferenceQuote key={index} result={result} index={index} />
-              ))
-            ) : (
-              <div className="py-6 text-center">
-                <p className="mb-2 text-muted-foreground">
-                  No references found that match your criteria
-                </p>
-                <p className="text-sm">
-                  Try different search terms or fewer filters to get more
-                  results
-                </p>
+            </CardHeader>
+            <form onSubmit={handleSubmit}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="ml-1">
+                    What are you looking for?
+                  </Label>
+
+                  <div className="relative">
+                    {/* Use our FilterChipsInput component */}
+                    <FilterChipsInput
+                      value={description}
+                      onChange={setDescription}
+                      placeholder="" // Empty real placeholder since we're using our custom one
+                      filtersHook={filtersHook}
+                      required={!demoMode}
+                      onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
+                    />
+
+                    {/* Custom placeholder overlay with reduced opacity */}
+                    {description === "" && !isFocused && placeholder && (
+                      <div
+                        className="pointer-events-none absolute left-0 top-0 p-3 text-sm"
+                        style={{ opacity: 0.6 }} // Reduced opacity for placeholder
+                      >
+                        {placeholder}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Finding references...
+                    </>
+                  ) : (
+                    "Find References"
+                  )}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+
+        {/* Results container with smooth size transitions */}
+        <div
+          className={` ${
+            hasSearched
+              ? "min-h-0 flex-1 opacity-100 transition-all duration-700 ease-in-out"
+              : "h-0 w-0 overflow-hidden opacity-0"
+          } transition-all duration-700 ease-in-out`}
+        >
+          <Card className="h-full transition-all duration-500 ease-in-out">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Results</CardTitle>
+                <CardDescription>
+                  {isLoading
+                    ? "Searching for references..."
+                    : results && results.length > 0
+                      ? `Found ${results.length} matching references${
+                          demoMode ? " (Demo Mode)" : ""
+                        }`
+                      : "No matching references found"}
+                </CardDescription>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              {results && results.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={copyAllToClipboard}
+                  className="flex items-center gap-1"
+                >
+                  {copiedAll ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                  Copy All
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoading ? (
+                <LoadingState />
+              ) : results && results.length > 0 ? (
+                <div className="animate-fadeIn space-y-4">
+                  {results.map((result, index) => (
+                    <ReferenceQuote key={index} result={result} index={index} />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-6 text-center">
+                  <p className="mb-2 text-muted-foreground">
+                    No references found that match your criteria
+                  </p>
+                  <p className="text-sm">
+                    Try different search terms or fewer filters to get more
+                    results
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
