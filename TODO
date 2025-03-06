@@ -1,7 +1,5 @@
-- dont reload staggered 
 - change to filter icon
 - mobile/small screen
-- staggered skeleton
 - dissapear placeholder on focus 
 - fading mask for results
 - clean double quotes

@@ -1,7 +1,8 @@
-// components/ui/StaggeredLoadingState.tsx
+// components/ui/LoadingState.tsx
 import { useState, useEffect } from "react";
 import { LoadingSpinner } from "~/components/ui/LoadingSpinner";
 import { AnimatedLoadingMessage } from "./AnimatedLoadingMessage";
+import { Info } from "lucide-react";
 
 interface LoadingQuoteProps {
   delay: number;
@@ -26,44 +27,63 @@ const LoadingQuote = ({ delay, skipAnimation }: LoadingQuoteProps) => {
 
   return (
     <div
-      className={`rounded-lg border bg-card p-4 shadow-sm transition-all ${skipAnimation ? "" : "duration-500 ease-in-out"} ${visible ? "max-h-[400px] opacity-100" : "max-h-0 overflow-hidden opacity-0"} `}
+      className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all ${
+        skipAnimation ? "" : "duration-500 ease-in-out"
+      } ${
+        visible
+          ? "max-h-[600px] opacity-100"
+          : "max-h-0 overflow-hidden opacity-0"
+      }`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="loading-skeleton h-5 w-36 rounded" />{" "}
-          {/* Company name */}
-          <div className="loading-skeleton h-5 w-24 rounded-full" />{" "}
-          {/* Industry badge */}
-          <div className="loading-skeleton h-5 w-24 rounded-full" />{" "}
-          {/* Market segment badge */}
+      {/* Quote Section - Main focus */}
+      <div className="p-6">
+        {/* Compact Metadata Row */}
+        <div className="pb-10">
+          <div className="flex items-center justify-between border-border pb-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="loading-skeleton h-5 w-36 rounded" />{" "}
+              {/* Contact name */}
+              <div className="loading-skeleton h-4 w-20 rounded opacity-70" />{" "}
+              {/* Account name */}
+              <div className="text-gray-400 opacity-70">
+                <Info className="h-4 w-4" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="loading-skeleton h-5 w-24 rounded-full" />{" "}
+              {/* Confidence badge */}
+            </div>
+          </div>
         </div>
-        <div className="loading-skeleton ml-auto h-5 w-24 rounded-full" />{" "}
-        {/* Confidence badge */}
-      </div>
 
-      {/* Quote content */}
-      <div className="my-3 border-l-4 border-primary pl-4">
-        <div className="space-y-2">
-          <div className="loading-skeleton h-4 w-full rounded" />
-          <div className="loading-skeleton h-4 w-11/12 rounded" />
-          <div className="loading-skeleton h-4 w-9/12 rounded" />
+        {/* Quote Content */}
+        <div className="relative mb-6 p-10">
+          <span className="text-primary-base absolute -left-1 -top-3 text-4xl opacity-20">
+            "
+          </span>
+          <div className="space-y-3 pl-4">
+            <div className="loading-skeleton h-5 w-full rounded" />
+            <div className="loading-skeleton h-5 w-11/12 rounded" />
+            <div className="loading-skeleton h-5 w-full rounded" />
+            <div className="loading-skeleton h-5 w-10/12 rounded" />
+            <div className="loading-skeleton h-5 w-8/12 rounded" />
+          </div>
+          <span className="text-primary-base absolute -bottom-3 -right-1 text-4xl opacity-20">
+            "
+          </span>
         </div>
       </div>
 
-      {/* Contact info */}
-      <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-        <div className="loading-skeleton h-4 w-48 rounded" /> {/* Contact */}
-        <div className="loading-skeleton h-4 w-40 rounded" /> {/* Use Case */}
-        <div className="loading-skeleton h-4 w-36 rounded" /> {/* CRM */}
-      </div>
-
-      {/* Action buttons */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <div className="loading-skeleton h-8 w-28 rounded" />{" "}
-        {/* Reference type button */}
-        <div className="loading-skeleton h-8 w-28 rounded" />{" "}
-        {/* Slide deck button */}
-        <div className="loading-skeleton ml-auto h-8 w-20 rounded" />{" "}
+      {/* Simplified Action Footer */}
+      <div className="flex items-center justify-between border-t border-border px-6 py-3">
+        <div className="flex gap-3">
+          <div className="loading-skeleton h-8 w-24 rounded" />{" "}
+          {/* Case study button */}
+          <div className="loading-skeleton h-8 w-16 rounded" />{" "}
+          {/* Slide button */}
+        </div>
+        <div className="loading-skeleton h-8 w-20 rounded" />{" "}
         {/* Copy button */}
       </div>
     </div>
@@ -94,10 +114,10 @@ export const LoadingState = ({
 
   return (
     <div className="w-full space-y-6 transition-all duration-500">
-      <div className="mb-4 flex items-center justify-between">
+      {/* <div className="mb-4 flex items-center justify-between">
         <div className="loading-skeleton h-6 w-48 rounded" />
         <div className="loading-skeleton h-9 w-24 rounded" />
-      </div>
+      </div> */}
 
       {/* Staggered loading quotes */}
       <LoadingQuote delay={200} skipAnimation={previouslyLoaded} />
@@ -106,7 +126,9 @@ export const LoadingState = ({
 
       {/* Loading message at bottom */}
       <div
-        className={`flex items-center justify-center gap-3 py-4 transition-opacity ${previouslyLoaded ? "" : "duration-500"} ${showMessage ? "opacity-100" : "opacity-0"} `}
+        className={`flex items-center justify-center gap-3 py-4 transition-opacity ${
+          previouslyLoaded ? "" : "duration-500"
+        } ${showMessage ? "opacity-100" : "opacity-0"}`}
       >
         <LoadingSpinner size="medium" className="text-[var(--primary-base)]" />
         <span className="text-[14px] leading-[20px] text-[var(--text-light)]">
