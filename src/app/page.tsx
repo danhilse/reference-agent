@@ -3,7 +3,7 @@ import ReferenceSearch from "~/components/reference-search";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[var(--app-background)]">
+    <main className="flex min-h-screen items-center justify-center bg-[var(--app-background)]">
       <div className="container-acton py-8">
         <div className="mb-8 flex flex-col items-center gap-6">
           <Image

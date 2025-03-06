@@ -1,0 +1,57 @@
+.
+├── README.md
+├── components.json
+├── next-env.d.ts
+├── next.config.js
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── prettier.config.js
+├── public
+│   └── favicon.ico
+├── src
+│   ├── app
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components
+│   │   ├── FilterSelect.tsx
+│   │   ├── Filters
+│   │   │   ├── FilterChipsInput.tsx
+│   │   │   └── RotatingPlaceholder.tsx
+│   │   ├── ReferenceQuote.tsx
+│   │   ├── RotatingPlaceholder.tsx
+│   │   ├── reference-search.tsx
+│   │   ├── theme-provider.tsx
+│   │   └── ui
+│   │       ├── AnimatedLoadingMessage.tsx
+│   │       ├── LoadingSpinner.tsx
+│   │       ├── LoadingState.tsx
+│   │       ├── badge.tsx
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       ├── command.tsx
+│   │       ├── dialog.tsx
+│   │       ├── label.tsx
+│   │       ├── popover.tsx
+│   │       ├── select.tsx
+│   │       ├── switch.tsx
+│   │       ├── textarea.tsx
+│   │       └── tooltip.tsx
+│   ├── constants
+│   │   └── example-queries.ts
+│   ├── env.js
+│   ├── lib
+│   │   ├── actions.ts
+│   │   ├── ai-config.ts
+│   │   ├── ai.ts
+│   │   ├── data.ts
+│   │   ├── mock-data.ts
+│   │   ├── types.ts
+│   │   └── utils.ts
+│   └── styles
+│       └── globals.css
+├── tailwind.config.ts
+├── tree.txt
+└── tsconfig.json
+
+10 directories, 45 files

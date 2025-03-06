@@ -1,9 +1,7 @@
 "use client";
 
-import type React from "react";
-
 import { useState } from "react";
-import { Check, ChevronDown, ChevronUp, Copy, Loader2 } from "lucide-react";
+import { Check, Copy, Loader2, Info } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -14,30 +12,47 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
 import { findReferences } from "~/lib/actions";
 import type { ReferenceResult } from "~/lib/types";
 import { Switch } from "~/components/ui/switch";
-import { ReferenceQuote } from "~/components/ReferenceQuote"; // Import the quote component
-import { FilterSelect } from "~/components/FilterSelect"; // Import the filter select component
-
+import { ReferenceQuote } from "~/components/ReferenceQuote";
 import { LoadingState } from "~/components/ui/LoadingState";
+import { RotatingPlaceholder } from "~/components/Filters/RotatingPlaceholder";
+import FilterChipsInput from "~/components/Filters/FilterChipsInput";
+import { useFilters } from "~/hooks/useFilters";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
-export default function ReferenceSearch() {
+export default function ImprovedReferenceSearch() {
+  // State for query input
   const [description, setDescription] = useState("");
-  const [industry, setIndustry] = useState("any");
-  const [marketSegment, setMarketSegment] = useState("any");
-  const [useCase, setUseCase] = useState("any");
-  const [crmType, setCrmType] = useState("any");
-  const [showFilters, setShowFilters] = useState(false);
+
+  // Use our custom filter hook
+  const filtersHook = useFilters();
+
+  // State for the placeholder text
+  const [placeholder, setPlaceholder] = useState("");
+
+  // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ReferenceResult[] | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
+
+  // Feature toggles
   const [demoMode, setDemoMode] = useState(false);
   const [aiProvider, setAiProvider] = useState<"anthropic" | "openai">(
     "anthropic",
   );
+
+  // Handle placeholder updates
+  const handlePlaceholderChange = (newPlaceholder: string) => {
+    setPlaceholder(newPlaceholder);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,14 +61,10 @@ export default function ReferenceSearch() {
     setResults(null);
 
     try {
+      const filterValues = filtersHook.getFilterValues();
       const references = await findReferences({
         description,
-        filters: {
-          industry: industry === "any" ? "" : industry,
-          marketSegment: marketSegment === "any" ? "" : marketSegment,
-          useCase: useCase === "any" ? "" : useCase,
-          crmType: crmType === "any" ? "" : crmType,
-        },
+        filters: filterValues,
         demoMode,
         aiProvider,
       });
@@ -87,130 +98,59 @@ export default function ReferenceSearch() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-[620px] space-y-6">
+      {/* Include the RotatingPlaceholder component */}
+      <RotatingPlaceholder onPlaceholderChange={handlePlaceholderChange} />
+
       <Card>
         <CardHeader>
           <CardTitle>Find References</CardTitle>
           <CardDescription>
             Search our customer reference database
           </CardDescription>
-          {/* Demo mode toggle */}
+          {/* Demo mode toggle with tooltip */}
           <div className="absolute right-4 top-4 flex items-center space-x-2">
-            <Switch
-              id="demo-mode"
-              checked={demoMode}
-              onCheckedChange={setDemoMode}
-            />
-            <Label
-              htmlFor="demo-mode"
-              className="text-muted-foreground text-sm"
-            >
-              Demo Mode
-            </Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="demo-mode"
+                      checked={demoMode}
+                      onCheckedChange={setDemoMode}
+                    />
+                    <Label
+                      htmlFor="demo-mode"
+                      className="flex items-center text-sm text-muted-foreground"
+                    >
+                      Demo Mode
+                      <Info className="ml-1 h-3 w-3" />
+                    </Label>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    Generate realistic reference examples instantly without
+                    calling the AI API
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="description">What are you looking for?</Label>
-              <Textarea
-                id="description"
-                placeholder="Example: A healthcare customer using marketing automation"
+
+              {/* Use our simplified FilterChipsInput component */}
+              <FilterChipsInput
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[100px]"
-                required
+                onChange={setDescription}
+                placeholder={placeholder}
+                filtersHook={filtersHook}
+                required={!demoMode}
               />
-            </div>
-
-            <div>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex w-full justify-between"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <span>Optional Filters</span>
-                {showFilters ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-
-              {showFilters && (
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <FilterSelect
-                    id="industry"
-                    label="Industry"
-                    value={industry}
-                    onValueChange={setIndustry}
-                    placeholder="Any industry"
-                    options={[
-                      { value: "any", label: "Any industry" },
-                      {
-                        value: "Accounting/Financial Services",
-                        label: "Accounting/Financial Services",
-                      },
-                      { value: "Healthcare", label: "Healthcare" },
-                      { value: "Technology", label: "Technology" },
-                      { value: "Manufacturing", label: "Manufacturing" },
-                      { value: "Education", label: "Education" },
-                    ]}
-                  />
-
-                  <FilterSelect
-                    id="marketSegment"
-                    label="Market Segment"
-                    value={marketSegment}
-                    onValueChange={setMarketSegment}
-                    placeholder="Any segment"
-                    options={[
-                      { value: "any", label: "Any segment" },
-                      { value: "SMB", label: "SMB" },
-                      { value: "Mid Market", label: "Mid Market" },
-                      { value: "Enterprise", label: "Enterprise" },
-                    ]}
-                  />
-
-                  <FilterSelect
-                    id="useCase"
-                    label="Use Case"
-                    value={useCase}
-                    onValueChange={setUseCase}
-                    placeholder="Any use case"
-                    options={[
-                      { value: "any", label: "Any use case" },
-                      { value: "Ease of Use", label: "Ease of Use" },
-                      { value: "Lead Generation", label: "Lead Generation" },
-                      {
-                        value: "Marketing Automation",
-                        label: "Marketing Automation",
-                      },
-                      { value: "Reporting", label: "Reporting" },
-                      { value: "Email Marketing", label: "Email Marketing" },
-                    ]}
-                  />
-
-                  <FilterSelect
-                    id="crmType"
-                    label="CRM Type"
-                    value={crmType}
-                    onValueChange={setCrmType}
-                    placeholder="Any CRM"
-                    options={[
-                      { value: "any", label: "Any CRM" },
-                      { value: "Salesforce", label: "Salesforce" },
-                      {
-                        value: "Microsoft Dynamics",
-                        label: "Microsoft Dynamics",
-                      },
-                      { value: "HubSpot", label: "HubSpot" },
-                      { value: "None", label: "None" },
-                    ]}
-                  />
-                </div>
-              )}
             </div>
           </CardContent>
           <CardFooter>
@@ -238,7 +178,9 @@ export default function ReferenceSearch() {
                 {isLoading
                   ? "Searching for references..."
                   : results && results.length > 0
-                    ? `Found ${results.length} matching references`
+                    ? `Found ${results.length} matching references${
+                        demoMode ? " (Demo Mode)" : ""
+                      }`
                     : "No matching references found"}
               </CardDescription>
             </div>
@@ -267,7 +209,7 @@ export default function ReferenceSearch() {
               ))
             ) : (
               <div className="py-6 text-center">
-                <p className="text-muted-foreground mb-2">
+                <p className="mb-2 text-muted-foreground">
                   No references found that match your criteria
                 </p>
                 <p className="text-sm">

@@ -3,32 +3,17 @@
 import type { CustomerReference, ReferenceRequest, ReferenceResult } from "./types"
 import { customerReferences } from "./data"
 import { generateReferencesWithAnthropic, generateReferencesWithOpenAI } from "./ai"
-
-// Demo mode references with pre-calculated confidence scores
-const demoReferences: ReferenceResult[] = [
-  {
-    ...customerReferences[1]!,
-    confidence: 95,
-  } as ReferenceResult,
-  {
-    ...customerReferences[3]!,
-    confidence: 87,
-  } as ReferenceResult,
-  {
-    ...customerReferences[8]!,
-    confidence: 78,
-  } as ReferenceResult,
-]
+import { generateMockResults } from "./mock-data"
 
 // Update the findReferences function to use the specified AI provider
 export async function findReferences(request: ReferenceRequest): Promise<ReferenceResult[]> {
   const { description, filters, demoMode, aiProvider = "anthropic" } = request
 
   try {
-    // If demo mode is enabled, return demo references with a small delay
+    // If demo mode is enabled, return mock results with a small delay
     if (demoMode) {
       await new Promise((resolve) => setTimeout(resolve, 1500))
-      return demoReferences
+      return generateMockResults(5, filters) // Generate 5 random references that match filters
     }
 
     // Validate input
