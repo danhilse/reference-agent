@@ -14,6 +14,7 @@ import {
 import { cn } from "~/lib/utils";
 import { useFilters, type FilterCategories } from "~/hooks/useFilters";
 import { filterData } from "~/constants/filterData";
+import { RotatingPlaceholder } from "./RotatingPlaceholder";
 
 // Types
 export interface FilterOption {
@@ -31,17 +32,17 @@ export interface FilterCategory {
 interface FilterChipsInputProps {
   value: string;
   onChange: (value: string) => void;
-  placeholder: string;
+  placeholder?: string; // Optional prop for static placeholder
   required?: boolean;
   filtersHook: ReturnType<typeof useFilters>;
-  onFocus?: () => void; // New prop for handling focus
-  onBlur?: () => void; // New prop for handling blur
+  onFocus?: () => void; // Prop for handling focus
+  onBlur?: () => void; // Prop for handling blur
 }
 
 const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   value,
   onChange,
-  placeholder,
+  placeholder: staticPlaceholder = "",
   required = false,
   filtersHook,
   onFocus,
@@ -54,6 +55,11 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   const [textAreaHeight, setTextAreaHeight] = useState("auto");
   const [isHoveringFilter, setIsHoveringFilter] = useState(false);
   const [mainPopoverOpen, setMainPopoverOpen] = useState(false);
+
+  // Focus state tracking
+  const [isFocused, setIsFocused] = useState(false);
+  // Dynamic placeholder from RotatingPlaceholder
+  const [dynamicPlaceholder, setDynamicPlaceholder] = useState("");
 
   // Helper to get display label for a filter value
   const getFilterLabel = (
@@ -80,11 +86,18 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
 
   // Handle focus and blur events
   const handleFocus = () => {
+    setIsFocused(true);
     if (onFocus) onFocus();
   };
 
   const handleBlur = () => {
+    setIsFocused(false);
     if (onBlur) onBlur();
+  };
+
+  // Handle placeholder changes from RotatingPlaceholder
+  const handlePlaceholderChange = (newPlaceholder: string) => {
+    setDynamicPlaceholder(newPlaceholder);
   };
 
   // Auto-resize textarea based on content and filter section height
@@ -107,14 +120,21 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   }, [value, filters]); // Re-run when filters change too
 
   return (
-    <div className="relative overflow-hidden rounded-lg border focus-within:ring-2 focus-within:ring-ring focus:border-transparent">
+    <div className="relative overflow-hidden rounded-lg border bg-white focus-within:ring-2 focus-within:ring-ring focus:border-transparent">
+      {/* Include the RotatingPlaceholder component */}
+      <RotatingPlaceholder
+        onPlaceholderChange={handlePlaceholderChange}
+        inputValue={value}
+        isFocused={isFocused}
+      />
+
       {/* Text input section */}
       <textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="" // Empty because we're using our custom overlay placeholder
-        className="w-full resize-none px-3 py-2 text-sm outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="w-full resize-none px-3 py-3 text-sm outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
         style={{
           minHeight: "100px",
           height: textAreaHeight,
@@ -124,6 +144,16 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
       />
+
+      {/* Custom placeholder overlay - show when input is empty (regardless of focus) */}
+      {value === "" && dynamicPlaceholder && (
+        <div
+          className="pointer-events-none absolute left-0 top-0 p-3 text-sm"
+          style={{ opacity: 0.5 }} // Reduced opacity for placeholder
+        >
+          {dynamicPlaceholder}
+        </div>
+      )}
 
       {/* Filter section - always present */}
       <div
@@ -145,7 +175,7 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
                   }}
                 >
                   <span className="font-medium">
-                    {filterData.find((cat) => cat.id === categoryId)?.label}:
+                    {filterData.find((cat) => cat.id === categoryId)?.label}:{" "}
                     {getFilterLabel(categoryId as FilterCategories, value)}
                   </span>
                   <Button
@@ -188,9 +218,9 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
               variant="ghost"
               size="xs"
               className={cn(
-                "h-6 rounded-full border-gray-300 px-1 text-xs transition-all duration-300 hover:bg-white hover:text-gray-500",
+                "h-6 rounded-full border border-transparent px-1 text-xs transition-all duration-300 hover:bg-white hover:text-gray-500",
                 (isHoveringFilter || mainPopoverOpen) &&
-                  "border bg-gray-100 px-2 text-gray-500",
+                  "border-gray-300 bg-gray-100 pr-2 text-gray-500",
               )}
               onMouseEnter={() => setIsHoveringFilter(true)}
               onMouseLeave={() => {
@@ -243,7 +273,7 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
                     side="right"
                     align="start"
                     sideOffset={5}
-                    className="w-56 p-2"
+                    className="w-64 p-2"
                   >
                     <div className="grid gap-1.5">
                       <p className="text-sm font-medium">
@@ -260,7 +290,7 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
                               key={option.value}
                               variant="ghost"
                               size="sm"
-                              className="w-full justify-start font-normal"
+                              className="w-full justify-start text-left font-normal"
                               style={{
                                 color: category.color,
                                 backgroundColor: isSelected
@@ -271,9 +301,9 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
                                 handleFilterToggle(category.id, option.value)
                               }
                             >
-                              {option.label}
+                              <span className="mr-auto">{option.label}</span>
                               {isSelected && (
-                                <Check className="ml-auto h-4 w-4" />
+                                <Check className="ml-2 h-4 w-4 flex-shrink-0" />
                               )}
                             </Button>
                           );

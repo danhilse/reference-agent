@@ -5,22 +5,28 @@ import { AnimatedLoadingMessage } from "./AnimatedLoadingMessage";
 
 interface LoadingQuoteProps {
   delay: number;
+  skipAnimation: boolean;
 }
 
-const LoadingQuote = ({ delay }: LoadingQuoteProps) => {
-  const [visible, setVisible] = useState(false);
+const LoadingQuote = ({ delay, skipAnimation }: LoadingQuoteProps) => {
+  const [visible, setVisible] = useState(skipAnimation);
 
   useEffect(() => {
+    if (skipAnimation) {
+      setVisible(true);
+      return;
+    }
+
     const timer = setTimeout(() => {
       setVisible(true);
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [delay]);
+  }, [delay, skipAnimation]);
 
   return (
     <div
-      className={`rounded-lg border bg-card p-4 shadow-sm transition-all duration-500 ease-in-out ${visible ? "max-h-[400px] opacity-100" : "max-h-0 overflow-hidden opacity-0"} `}
+      className={`rounded-lg border bg-card p-4 shadow-sm transition-all ${skipAnimation ? "" : "duration-500 ease-in-out"} ${visible ? "max-h-[400px] opacity-100" : "max-h-0 overflow-hidden opacity-0"} `}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -64,16 +70,27 @@ const LoadingQuote = ({ delay }: LoadingQuoteProps) => {
   );
 };
 
-export const LoadingState = () => {
-  const [showMessage, setShowMessage] = useState(false);
+interface LoadingStateProps {
+  previouslyLoaded?: boolean;
+}
+
+export const LoadingState = ({
+  previouslyLoaded = false,
+}: LoadingStateProps) => {
+  const [showMessage, setShowMessage] = useState(previouslyLoaded);
 
   useEffect(() => {
+    if (previouslyLoaded) {
+      setShowMessage(true);
+      return;
+    }
+
     const timer = setTimeout(() => {
       setShowMessage(true);
     }, 1200); // Show message after quotes start appearing
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [previouslyLoaded]);
 
   return (
     <div className="w-full space-y-6 transition-all duration-500">
@@ -83,13 +100,13 @@ export const LoadingState = () => {
       </div>
 
       {/* Staggered loading quotes */}
-      <LoadingQuote delay={200} />
-      <LoadingQuote delay={600} />
-      <LoadingQuote delay={1000} />
+      <LoadingQuote delay={200} skipAnimation={previouslyLoaded} />
+      <LoadingQuote delay={600} skipAnimation={previouslyLoaded} />
+      <LoadingQuote delay={1000} skipAnimation={previouslyLoaded} />
 
       {/* Loading message at bottom */}
       <div
-        className={`flex items-center justify-center gap-3 py-4 transition-opacity duration-500 ${showMessage ? "opacity-100" : "opacity-0"} `}
+        className={`flex items-center justify-center gap-3 py-4 transition-opacity ${previouslyLoaded ? "" : "duration-500"} ${showMessage ? "opacity-100" : "opacity-0"} `}
       >
         <LoadingSpinner size="medium" className="text-[var(--primary-base)]" />
         <span className="text-[14px] leading-[20px] text-[var(--text-light)]">

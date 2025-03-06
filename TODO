@@ -1,3 +1,10 @@
-- copy icons
 - dont reload staggered 
 - change to filter icon
+- mobile/small screen
+- staggered skeleton
+- dissapear placeholder on focus 
+- fading mask for results
+- clean double quotes
+
+// Backend
+- must be able to say "From Company" and get those results!

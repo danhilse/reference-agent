@@ -17,7 +17,6 @@ import type { ReferenceResult } from "~/lib/types";
 import { Switch } from "~/components/ui/switch";
 import { ReferenceQuote } from "~/components/ReferenceQuote";
 import { LoadingState } from "~/components/ui/LoadingState";
-import { RotatingPlaceholder } from "~/components/Filters/RotatingPlaceholder";
 import FilterChipsInput from "~/components/Filters/FilterChipsInput";
 import { useFilters } from "~/hooks/useFilters";
 import {
@@ -39,44 +38,33 @@ export default function ImprovedReferenceSearch({
   // State for query input
   const [description, setDescription] = useState("");
 
-  // Track input focus state
-  const [isFocused, setIsFocused] = useState(false);
-
   // Use our custom filter hook
   const filtersHook = useFilters();
-
-  // State for the placeholder text
-  const [placeholder, setPlaceholder] = useState("");
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ReferenceResult[] | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
-
-  // Handle placeholder updates
-  const handlePlaceholderChange = (newPlaceholder: string) => {
-    setPlaceholder(newPlaceholder);
-  };
-
-  // Focus handlers for the input
-  const handleInputFocus = () => {
-    setIsFocused(true);
-  };
-
-  const handleInputBlur = () => {
-    setIsFocused(false);
-  };
+  const [previouslyLoadedResults, setPreviouslyLoadedResults] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setHasSearched(true);
-    setResults(null);
+
+    // Track if results were previously loaded
+    setPreviouslyLoadedResults(results !== null);
+
+    // We don't clear results here immediately to track their existence
+    // but we'll set them to null right after checking
 
     try {
       // Add a minimum delay for better UX with staggered loading
       const filterValues = filtersHook.getFilterValues();
+
+      // Now we can clear results
+      setResults(null);
 
       // Use Promise.all to run both the delay and the API call in parallel
       const [references] = await Promise.all([
@@ -122,29 +110,18 @@ export default function ImprovedReferenceSearch({
     <div className="container mx-auto transition-all duration-500 ease-in-out">
       {/* Main layout container - transitions from centered to side-by-side */}
       <div
-        className={`mx-auto flex gap-6 ${hasSearched ? "lg:mx-0 lg:flex-row lg:items-start" : "flex-col items-center"} transition-all duration-500 ease-in-out`}
+        className={`mx-auto flex flex-col gap-6 ${hasSearched ? "lg:mx-0 lg:flex-row lg:items-start" : "flex-col items-center"} transition-all duration-500 ease-in-out`}
       >
         {/* Query Card - becomes sticky when results are shown but maintains width */}
         <div
           className={` ${
-            hasSearched ? "lg:sticky lg:top-6" : ""
-          } w-full min-w-[380px] max-w-[440px] transition-all duration-500 ease-in-out`}
+            hasSearched
+              ? "lg:sticky lg:top-6 lg:max-w-[480px]"
+              : "max-w-[570px]"
+          } w-full min-w-[280px] transition-all duration-500 ease-in-out`}
         >
-          {/* Pass the required props to RotatingPlaceholder */}
-          <RotatingPlaceholder
-            onPlaceholderChange={handlePlaceholderChange}
-            inputValue={description}
-            isFocused={isFocused}
-          />
-
-          <Card>
-            <CardHeader className="ml-1">
-              <CardTitle>Find References</CardTitle>
-              <CardDescription>
-                Search our customer reference database
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
+          <Card className="border-none bg-transparent shadow-none transition-all duration-500 ease-in-out">
+            <form onSubmit={handleSubmit} className="">
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="description" className="ml-1">
@@ -152,30 +129,18 @@ export default function ImprovedReferenceSearch({
                   </Label>
 
                   <div className="relative">
-                    {/* Use our FilterChipsInput component */}
+                    {/* FilterChipsInput now handles the rotating placeholder internally */}
                     <FilterChipsInput
                       value={description}
                       onChange={setDescription}
-                      placeholder="" // Empty real placeholder since we're using our custom one
+                      placeholder=""
                       filtersHook={filtersHook}
                       required={!demoMode}
-                      onFocus={handleInputFocus}
-                      onBlur={handleInputBlur}
                     />
-
-                    {/* Custom placeholder overlay with reduced opacity */}
-                    {description === "" && !isFocused && placeholder && (
-                      <div
-                        className="pointer-events-none absolute left-0 top-0 p-3 text-sm"
-                        style={{ opacity: 0.6 }} // Reduced opacity for placeholder
-                      >
-                        {placeholder}
-                      </div>
-                    )}
                   </div>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="">
                 <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? (
                     <>
@@ -199,7 +164,7 @@ export default function ImprovedReferenceSearch({
               : "h-0 w-0 overflow-hidden opacity-0"
           } transition-all duration-700 ease-in-out`}
         >
-          <Card className="h-full transition-all duration-500 ease-in-out">
+          <Card className="border-none bg-transparent shadow-none transition-all duration-500 ease-in-out">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Results</CardTitle>
@@ -231,7 +196,7 @@ export default function ImprovedReferenceSearch({
             </CardHeader>
             <CardContent className="space-y-4">
               {isLoading ? (
-                <LoadingState />
+                <LoadingState previouslyLoaded={previouslyLoadedResults} />
               ) : results && results.length > 0 ? (
                 <div className="animate-fadeIn space-y-4">
                   {results.map((result, index) => (

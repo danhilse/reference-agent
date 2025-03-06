@@ -1,0 +1,334 @@
+<svg width="200" height="200" viewBox="0 0 200 200" 
+     xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient for "bigger" (Piece 1) - Yellow -->
+    <linearGradient id="gradBigger" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="hsl(48,100%,50%)">
+        <animate attributeName="stop-color"
+                 values="hsl(48,100%,50%);hsl(48,100%,55%);hsl(48,100%,50%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="hsl(48,100%,50%)">
+        <animate attributeName="stop-color"
+                 values="hsl(48,100%,50%);hsl(48,100%,45%);hsl(48,100%,50%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <!-- Gradient for "big" (Piece 2) -->
+    <linearGradient id="gradBig" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="hsl(0,86%,64%)">
+        <animate attributeName="stop-color"
+                 values="hsl(0,86%,64%);hsl(0,86%,67%);hsl(0,86%,64%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="hsl(0,86%,64%)">
+        <animate attributeName="stop-color"
+                 values="hsl(0,86%,64%);hsl(0,86%,61%);hsl(0,86%,64%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <!-- Gradient for "small" (Piece 3) -->
+    <linearGradient id="gradSmall" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="hsl(181,100%,37%)">
+        <animate attributeName="stop-color"
+                 values="hsl(181,100%,37%);hsl(181,100%,40%);hsl(181,100%,37%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="hsl(181,100%,37%)">
+        <animate attributeName="stop-color"
+                 values="hsl(181,100%,37%);hsl(181,100%,34%);hsl(181,100%,37%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <!-- Gradient for "smallest" (Piece 4) -->
+    <linearGradient id="gradSmallest" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="hsl(216,40%,32%)">
+        <animate attributeName="stop-color"
+                 values="hsl(216,40%,32%);hsl(216,40%,35%);hsl(216,40%,32%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="hsl(216,40%,32%)">
+        <animate attributeName="stop-color"
+                 values="hsl(216,40%,32%);hsl(216,40%,29%);hsl(216,40%,32%)"
+                 dur="2s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer group: continuous slow base rotation (20s) -->
+  <g transform="rotate(0,100,100)">
+    <animateTransform attributeName="transform"
+                      type="rotate"
+                      from="0 100 100"
+                      to="360 100 100"
+                      dur="20s"
+                      repeatCount="indefinite"
+                      calcMode="linear" />
+    
+    <!-- Inner group: fast burst rotation (2s cycle) -->
+    <g transform="rotate(0,100,100)">
+      <animateTransform attributeName="transform"
+                        type="rotate"
+                        values="0 100 100; 0 100 100; 360 100 100; 360 100 100"
+                        keyTimes="0; 0.2; 0.8; 1"
+                        dur="2s"
+                        repeatCount="indefinite"
+                        calcMode="spline"
+                        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
+                        additive="sum" />
+      
+      <!-- Logo group: shifted to center the shape -->
+      <g transform="translate(86,85)">
+        <!-- Piece 1: Bigger (top-right quadrant) -->
+        <path d="M12.3299 7.80088C12.3012 3.5609 15.7224 0.0851065 20.0084 0H28V7.90459C27.914 12.1438 24.3999 15.5278 20.1132 15.4994C15.8265 15.4711 12.3586 12.0409 12.3299 7.80088Z" 
+              fill="url(#gradBigger)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; 20 -20; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 2: Big (bottom-right quadrant) -->
+        <path d="M18.681 17.0444C22.2641 17.0209 25.2012 19.8496 25.273 23.393V30H18.5924C15.01 29.9285 12.1505 27.023 12.1747 23.479C12.199 19.9349 15.0979 17.0679 18.681 17.0444Z" 
+              fill="url(#gradBig)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; 20 20; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 3: Small (bottom-left quadrant) -->
+        <path d="M0 27.7911H5.50555C8.45723 27.7319 10.813 25.3378 10.7931 22.4178C10.7731 19.4977 8.38478 17.1354 5.43255 17.1156C2.48032 17.0959 0.0598983 19.426 0 22.3456V27.7911Z" 
+              fill="url(#gradSmall)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; -20 20; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 4: Smallest (top-left quadrant) -->
+        <path d="M2.04049 11.1719V6.83249H6.42772C8.78014 6.87951 10.6578 8.78742 10.6419 11.1146C10.6261 13.4418 8.72263 15.3246 6.36979 15.3402C4.01695 15.3559 2.08803 13.4987 2.04049 11.1719Z" 
+              fill="url(#gradSmallest)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; -20 -20; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+      </g>
+    </g>
+  </g>
+
+
+  <!-- Outer group: continuous slow base rotation (20s) -->
+  <g transform="rotate(0,100,100)" opacity="0.35">
+    <animateTransform attributeName="transform"
+                      type="rotate"
+                      from="0 100 100"
+                      to="360 100 100"
+                      dur="20s"
+                      repeatCount="indefinite"
+                      calcMode="linear" />
+    
+    <!-- Inner group: fast burst rotation (2s cycle) -->
+    <g transform="rotate(0,100,100)">
+      <animateTransform attributeName="transform"
+                        type="rotate"
+                        values="0 100 100; 0 100 100; 360 100 100; 360 100 100"
+                        keyTimes="0; 0.25; 0.8; 1"
+                        dur="2s"
+                        repeatCount="indefinite"
+                        calcMode="spline"
+                        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
+                        additive="sum" />
+      
+      <!-- Logo group: shifted to center the shape -->
+      <g transform="translate(86,85)">
+        <!-- Piece 1: Bigger (top-right quadrant) -->
+        <path d="M12.3299 7.80088C12.3012 3.5609 15.7224 0.0851065 20.0084 0H28V7.90459C27.914 12.1438 24.3999 15.5278 20.1132 15.4994C15.8265 15.4711 12.3586 12.0409 12.3299 7.80088Z" 
+              fill="url(#gradBigger)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; 22 -22; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 2: Big (bottom-right quadrant) -->
+        <path d="M18.681 17.0444C22.2641 17.0209 25.2012 19.8496 25.273 23.393V30H18.5924C15.01 29.9285 12.1505 27.023 12.1747 23.479C12.199 19.9349 15.0979 17.0679 18.681 17.0444Z" 
+              fill="url(#gradBig)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; 22 22; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 3: Small (bottom-left quadrant) -->
+        <path d="M0 27.7911H5.50555C8.45723 27.7319 10.813 25.3378 10.7931 22.4178C10.7731 19.4977 8.38478 17.1354 5.43255 17.1156C2.48032 17.0959 0.0598983 19.426 0 22.3456V27.7911Z" 
+              fill="url(#gradSmall)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; -22 22; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 4: Smallest (top-left quadrant) -->
+        <path d="M2.04049 11.1719V6.83249H6.42772C8.78014 6.87951 10.6578 8.78742 10.6419 11.1146C10.6261 13.4418 8.72263 15.3246 6.36979 15.3402C4.01695 15.3559 2.08803 13.4987 2.04049 11.1719Z" 
+              fill="url(#gradSmallest)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; -22 -22; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+      </g>
+    </g>
+  </g>
+
+
+
+
+  <!-- Outer group: continuous slow base rotation (20s) -->
+  <g transform="rotate(0,100,100)" opacity="0.20">
+    <animateTransform attributeName="transform"
+                      type="rotate"
+                      from="0 100 100"
+                      to="360 100 100"
+                      dur="20s"
+                      repeatCount="indefinite"
+                      calcMode="linear" />
+    
+    <!-- Inner group: fast burst rotation (2s cycle) -->
+    <g transform="rotate(0,100,100)">
+      <animateTransform attributeName="transform"
+                        type="rotate"
+                        values="0 100 100; 0 100 100; 360 100 100; 360 100 100"
+                        keyTimes="0; 0.3; 0.8; 1"
+                        dur="2s"
+                        repeatCount="indefinite"
+                        calcMode="spline"
+                        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
+                        additive="sum" />
+      
+      <!-- Logo group: shifted to center the shape -->
+      <g transform="translate(86,85)">
+        <!-- Piece 1: Bigger (top-right quadrant) -->
+        <path d="M12.3299 7.80088C12.3012 3.5609 15.7224 0.0851065 20.0084 0H28V7.90459C27.914 12.1438 24.3999 15.5278 20.1132 15.4994C15.8265 15.4711 12.3586 12.0409 12.3299 7.80088Z" 
+              fill="url(#gradBigger)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; 25 -25; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 2: Big (bottom-right quadrant) -->
+        <path d="M18.681 17.0444C22.2641 17.0209 25.2012 19.8496 25.273 23.393V30H18.5924C15.01 29.9285 12.1505 27.023 12.1747 23.479C12.199 19.9349 15.0979 17.0679 18.681 17.0444Z" 
+              fill="url(#gradBig)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; 25 25; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 3: Small (bottom-left quadrant) -->
+        <path d="M0 27.7911H5.50555C8.45723 27.7319 10.813 25.3378 10.7931 22.4178C10.7731 19.4977 8.38478 17.1354 5.43255 17.1156C2.48032 17.0959 0.0598983 19.426 0 22.3456V27.7911Z" 
+              fill="url(#gradSmall)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; -25 25; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+        
+        <!-- Piece 4: Smallest (top-left quadrant) -->
+        <path d="M2.04049 11.1719V6.83249H6.42772C8.78014 6.87951 10.6578 8.78742 10.6419 11.1146C10.6261 13.4418 8.72263 15.3246 6.36979 15.3402C4.01695 15.3559 2.08803 13.4987 2.04049 11.1719Z" 
+              fill="url(#gradSmallest)">
+          <animateTransform attributeName="transform"
+                            type="translate"
+                            values="0 0; 0 0; -25 -25; 0 0; 0 0"
+                            keyTimes="0; 0.2; 0.5; 0.8; 1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                            calcMode="spline"
+                            keySplines="0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1;
+                                        0.42 0 0.58 1" />
+        </path>
+      </g>
+    </g>
+  </g>
+</svg>

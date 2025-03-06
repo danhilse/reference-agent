@@ -19,9 +19,10 @@ export const RotatingPlaceholder = ({
   const [isTyping, setIsTyping] = useState(false); // Start false for initial delay
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPaused, setIsPaused] = useState(true); // Start paused for initial delay
+  const [needsRestart, setNeedsRestart] = useState(false);
 
   // Timings
-  const initialDelay = 2000; // 3-second initial delay
+  const initialDelay = 1000; // 2-second initial delay (changed from 3s to match your comment)
   const typingSpeed = 60; // ms per character when typing
   const deletingSpeed = 15; // ms per character when deleting
   const deleteChunkSize = 3; // Delete multiple characters at once for faster deletion
@@ -31,6 +32,8 @@ export const RotatingPlaceholder = ({
   // Refs for managing timeouts and state
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const placeholderTextRef = useRef<string>("");
+  const prevInputValueRef = useRef<string>(inputValue);
+  const prevFocusedRef = useRef<boolean>(isFocused);
 
   // Clean up timeouts when component unmounts
   useEffect(() => {
@@ -41,24 +44,37 @@ export const RotatingPlaceholder = ({
     };
   }, []);
 
-  // Determine if placeholder should be visible
-  const isVisible = inputValue === "" && !isFocused;
+  // Placeholder is visible when there's no text, regardless of focus state
+  const isVisible = inputValue === "";
 
-  // Handle visibility changes - restart cycle when becoming visible
+  // Track changes to determine if we need to restart the animation
+  useEffect(() => {
+    // ONLY restart if we had text and now we don't
+    // Focus/blur should NOT impact the placeholder animation
+    if (prevInputValueRef.current !== "" && inputValue === "") {
+      setNeedsRestart(true);
+    }
+
+    prevInputValueRef.current = inputValue;
+    prevFocusedRef.current = isFocused;
+  }, [inputValue, isFocused]);
+
+  // Handle visibility and restart conditions
   useEffect(() => {
     if (!isVisible) {
-      // When not visible, clear placeholder and stop animation
+      // When there is text, clear placeholder and stop animation
       safeUpdatePlaceholder("");
       setIsPaused(true);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-    } else {
-      // When becoming visible, restart with initial delay
+    } else if (isVisible && needsRestart) {
+      // Only restart when text was deleted (needsRestart flag)
       setDisplayText("");
       setIsTyping(false);
       setIsDeleting(false);
       setIsPaused(true);
+      setNeedsRestart(false);
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -69,8 +85,21 @@ export const RotatingPlaceholder = ({
         setIsPaused(false);
         setIsTyping(true);
       }, initialDelay);
+    } else if (
+      isVisible &&
+      isPaused &&
+      !isTyping &&
+      !isDeleting &&
+      displayText === ""
+    ) {
+      // Initial start (first render) - only trigger if we don't have text displayed yet
+      timeoutRef.current = setTimeout(() => {
+        setIsPaused(false);
+        setIsTyping(true);
+      }, initialDelay);
     }
-  }, [isVisible]);
+    // Only depend on isVisible and needsRestart, not focus state
+  }, [isVisible, needsRestart]);
 
   // Safe way to update the placeholder
   const safeUpdatePlaceholder = (text: string) => {

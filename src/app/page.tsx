@@ -73,13 +73,21 @@ export default function Home() {
           className="flex cursor-pointer flex-col items-center justify-center"
           onClick={handleSkip}
         >
-          <Image
+          {/* <Image
             src="/loading_logo.svg"
             alt="Act-On Loading"
             width={500}
             height={500}
             priority
-            className="animate-pulse"
+            className="absolute animate-pulse"
+          /> */}
+          <Image
+            src="/loading_logo 2.svg"
+            alt="Act-On Loading"
+            width={500}
+            height={500}
+            priority
+            className="absolute animate-pulse"
           />
         </div>
       ) : (

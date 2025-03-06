@@ -36,7 +36,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
   };
 
   return (
-    <div className="bg-card rounded-lg border p-4 shadow-sm">
+    <div className="rounded-lg border bg-card p-6 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-semibold">{result.customerName}</h3>
@@ -48,23 +48,24 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
         </Badge>
       </div>
 
-      <blockquote className="border-primary my-3 border-l-4 pl-4 italic text-gray-700">
+      <blockquote className="my-3 border-l-4 border-primary pl-4 italic text-gray-700">
         "{result.referenceDetail}"
       </blockquote>
 
-      <div className="text-muted-foreground mt-3 text-sm">
+      <div className="mt-3 text-sm text-muted-foreground">
         <p>
-          <span className="font-medium">Contact:</span> {result.customerContact}
+          <span className="font-semibold">Contact:</span>{" "}
+          {result.customerContact}
         </p>
         <p>
-          <span className="font-medium">Use Case:</span> {result.useCase}
+          <span className="font-semibold">Use Case:</span> {result.useCase}
         </p>
         <p>
-          <span className="font-medium">CRM:</span> {result.crm}
+          <span className="font-semibold">CRM:</span> {result.crm}
         </p>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap items-end gap-2">
         {result.caseStudyLink && (
           <Button variant="outline" size="sm" className="text-xs" asChild>
             <a
@@ -94,7 +95,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
         <Button
           variant="outline"
           size="sm"
-          className="ml-auto text-xs"
+          className="ml-auto h-0 border-none bg-transparent p-0 text-xs opacity-50 hover:opacity-100"
           onClick={copyToClipboard}
         >
           {copied ? (
