@@ -8,7 +8,6 @@
 export const exampleQueries = [
   // Short queries
   "Email marketing ROI",
-  "Easy to use",
   "Integration with Salesforce",
   "Great support team",
   "Lead scoring success",

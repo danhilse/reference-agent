@@ -113,7 +113,7 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
       {/* Filter section - always present */}
       <div
         ref={filterSectionRef}
-        className="absolute bottom-0 left-0 right-0 flex min-h-[36px] flex-wrap items-center gap-1.5 bg-muted/20 px-1 py-1.5"
+        className="absolute bottom-0 left-0 right-0 flex min-h-[36px] flex-wrap items-center gap-1.5 bg-muted/20 px-2 py-1.5"
       >
         {/* Filter chips */}
         {Object.entries(filters).map(([categoryId, values]) =>
@@ -153,20 +153,50 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
         )}
 
         {/* Add filter button - always present in filter section */}
-        <Popover open={mainPopoverOpen} onOpenChange={setMainPopoverOpen}>
+        <Popover
+          open={mainPopoverOpen}
+          onOpenChange={(open) => {
+            setMainPopoverOpen(open);
+            // Keep the hover effect when popover is open
+            if (open) {
+              setIsHoveringFilter(true);
+            } else {
+              // Only reset hover state if not actually hovering
+              if (!isHoveringFilter) {
+                setIsHoveringFilter(false);
+              }
+            }
+          }}
+        >
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
               size="xs"
-              className="h-6 rounded-full text-xs text-gray-500 transition-all duration-300 hover:bg-gray-300 hover:text-gray-700"
+              className={cn(
+                "h-6 rounded-full border-gray-300 text-xs transition-all duration-300 hover:bg-white hover:text-gray-600",
+                (isHoveringFilter || mainPopoverOpen) &&
+                  "border bg-gray-100 text-gray-600",
+              )}
               onMouseEnter={() => setIsHoveringFilter(true)}
-              onMouseLeave={() => setIsHoveringFilter(false)}
+              onMouseLeave={() => {
+                // Only remove hover state if popover is closed
+                if (!mainPopoverOpen) {
+                  setIsHoveringFilter(false);
+                }
+              }}
             >
-              <Plus className="h-3 w-3" />
+              <Plus
+                className={cn(
+                  "h-3 w-3 transition-transform duration-200",
+                  mainPopoverOpen && "rotate-45",
+                )}
+              />
               <span
                 className={cn(
-                  "overflow-hidden whitespace-nowrap transition-all duration-300",
-                  isHoveringFilter ? "ml-1 max-w-24 opacity-100" : "opacity-0",
+                  "duration-400 overflow-hidden whitespace-nowrap transition-all",
+                  isHoveringFilter || mainPopoverOpen
+                    ? "ml-1 max-w-24 opacity-100"
+                    : "w-0 opacity-0",
                 )}
               >
                 Add Filter
