@@ -116,9 +116,9 @@ export default function ImprovedReferenceSearch({
         <div
           className={` ${
             hasSearched
-              ? "lg:sticky lg:top-6 lg:max-w-[480px]"
+              ? "sticky top-0 pt-6 lg:w-[480px] lg:max-w-[40%]"
               : "max-w-[570px]"
-          } w-full min-w-[280px] transition-all duration-500 ease-in-out`}
+          } z-10 w-full min-w-[280px] bg-gradient-to-b from-background from-70% via-background to-transparent pb-12 backdrop-blur-[410%] transition-all duration-500 ease-in-out`}
         >
           <Card className="border-none bg-transparent shadow-none transition-all duration-500 ease-in-out">
             <form onSubmit={handleSubmit} className="">

@@ -3,6 +3,8 @@
 - dissapear placeholder on focus 
 - fading mask for results
 - clean double quotes
+- limit, load more
+- analytics -> google sheets
 
 // Backend
 - must be able to say "From Company" and get those results!
