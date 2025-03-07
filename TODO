@@ -6,5 +6,7 @@
 - limit, load more
 - analytics -> google sheets
 
+
 // Backend
 - must be able to say "From Company" and get those results!
+- - return a "key words" that highlight the match in bold.

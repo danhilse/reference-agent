@@ -139,13 +139,13 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
         </div>
 
         <blockquote className="relative mb-6 p-10 font-semibold text-gray-700">
-          <span className="text-primary-base absolute -left-1 -top-3 text-4xl opacity-20">
+          <span className="text-primary-base absolute left-1 top-4 text-4xl opacity-20">
             "
           </span>
           <p className="pl-4 text-lg italic leading-relaxed text-gray-500">
             {result.referenceDetail}
           </p>
-          <span className="text-primary-base absolute -bottom-3 -right-1 text-4xl opacity-20">
+          <span className="text-primary-base absolute bottom-4 right-1 text-4xl opacity-20">
             "
           </span>
         </blockquote>
