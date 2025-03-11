@@ -124,6 +124,7 @@ export const RotatingPlaceholder = ({
     if (isPaused || !isVisible) return;
 
     const currentQuery = exampleQueries[currentIndex];
+    if (!currentQuery) return;
 
     if (isTyping) {
       // If we haven't typed out the full placeholder yet
