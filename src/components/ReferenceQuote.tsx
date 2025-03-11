@@ -1,16 +1,9 @@
 import { useState } from "react";
-import {
-  Check,
-  Copy,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { Check, Copy, ExternalLink, Info } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import type { ReferenceResult } from "~/lib/types";
 import { cn } from "~/lib/utils";
-import { Info } from "lucide-react";
 
 interface ReferenceQuoteProps {
   result: ReferenceResult;
@@ -61,6 +54,110 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
   // Check if there's any metadata to show
   const hasMetadata =
     result.useCase || result.industry || result.crm || result.marketSegment;
+
+  // Function to highlight key phrases in the quote
+  const renderHighlightedQuote = () => {
+    // Debugging information
+    console.log(
+      `ReferenceQuote ${index} - customerName: ${result.customerName}`,
+    );
+    console.log(`ReferenceQuote ${index} - highlights:`, result.highlights);
+
+    // If no highlights are available or if they're empty, return the original text
+    if (!result.highlights || result.highlights.length === 0) {
+      console.log(`ReferenceQuote ${index} - No highlights available`);
+      return (
+        <p className="pl-4 text-lg italic leading-relaxed text-gray-500">
+          {result.referenceDetail}
+        </p>
+      );
+    }
+
+    // Check for exact matches in the text
+    const exactMatches = result.highlights.filter((highlight) =>
+      result.referenceDetail.includes(highlight),
+    );
+
+    console.log(
+      `ReferenceQuote ${index} - Found ${exactMatches.length} exact matches out of ${result.highlights.length} highlights`,
+    );
+
+    if (exactMatches.length === 0) {
+      console.log(
+        `ReferenceQuote ${index} - No exact matches found. Original text:`,
+        result.referenceDetail.substring(0, 50) + "...",
+      );
+      console.log(
+        `ReferenceQuote ${index} - First highlight:`,
+        result.highlights[0],
+      );
+      return (
+        <p className="pl-4 text-lg italic leading-relaxed text-gray-500">
+          {result.referenceDetail}
+        </p>
+      );
+    }
+
+    // Sort highlights by their position in the text
+    const sortedHighlights = [...exactMatches].sort(
+      (a, b) =>
+        result.referenceDetail.indexOf(a) - result.referenceDetail.indexOf(b),
+    );
+
+    // Create segments for highlighting
+    let remainingText = result.referenceDetail;
+    const segments: { text: string; isHighlight: boolean }[] = [];
+
+    sortedHighlights.forEach((highlight) => {
+      const highlightIndex = remainingText.indexOf(highlight);
+      if (highlightIndex === -1) return;
+
+      // Add text before the highlight
+      if (highlightIndex > 0) {
+        segments.push({
+          text: remainingText.substring(0, highlightIndex),
+          isHighlight: false,
+        });
+      }
+
+      // Add the highlighted text
+      segments.push({
+        text: highlight,
+        isHighlight: true,
+      });
+
+      // Update the remaining text
+      remainingText = remainingText.substring(
+        highlightIndex + highlight.length,
+      );
+    });
+
+    // Add any remaining text
+    if (remainingText.length > 0) {
+      segments.push({
+        text: remainingText,
+        isHighlight: false,
+      });
+    }
+
+    console.log(
+      `ReferenceQuote ${index} - Created ${segments.length} segments`,
+    );
+
+    // Render the segments
+    return (
+      <p className="pl-4 text-lg italic leading-relaxed text-gray-500">
+        {segments.map((segment, i) => (
+          <span
+            key={i}
+            className={segment.isHighlight ? "px-0.5 font-bold text-black" : ""}
+          >
+            {segment.text}
+          </span>
+        ))}
+      </p>
+    );
+  };
 
   return (
     <div className="overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md">
@@ -142,9 +239,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
           <span className="text-primary-base absolute left-1 top-4 text-4xl opacity-20">
             "
           </span>
-          <p className="pl-4 text-lg italic leading-relaxed text-gray-500">
-            {result.referenceDetail}
-          </p>
+          {renderHighlightedQuote()}
           <span className="text-primary-base absolute bottom-4 right-1 text-4xl opacity-20">
             "
           </span>

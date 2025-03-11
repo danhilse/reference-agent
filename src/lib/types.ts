@@ -35,4 +35,5 @@ export interface CustomerReference {
 
 export interface ReferenceResult extends CustomerReference {
   confidence: number
+  highlights?: string[] // Array of text fragments to highlight
 }

@@ -4,9 +4,11 @@ import type { CustomerReference, ReferenceRequest, ReferenceResult } from "./typ
 import { customerReferences } from "./data"
 import { generateReferencesWithAnthropic, generateReferencesWithOpenAI } from "./ai"
 import { generateMockResults } from "./mock-data"
-import { interpretRequest } from "./interpreter"  // Import the new interpreter
+import { interpretRequest } from "./interpreter"
+import { refineSearchResults } from "./refine-results"
+import { isProviderConfigured } from "./ai-config"
 
-// Update the findReferences function to use the request interpreter
+// Update the findReferences function to include the refinement step
 export async function findReferences(request: ReferenceRequest): Promise<ReferenceResult[]> {
   try {
     // Step 1: First interpret and enhance the request
@@ -60,7 +62,7 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
       console.log(`After CRM type filter (${filters.crmType}): ${filteredReferences.length} references`)
     }
     
-    // New: Filter by company if provided
+    // Filter by company if provided
     if (filters.company && filters.company.trim() !== '') {
       console.log("Filtering by company:", filters.company)
       const beforeCount = filteredReferences.length
@@ -70,14 +72,6 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
           ref.accountName.toLowerCase().includes(filters.company!.toLowerCase())
       )
       console.log(`After company filter (${filters.company}): ${filteredReferences.length} references (reduced from ${beforeCount})`)
-      
-      // Debug: Log the remaining references to verify company filtering
-      console.log("References after company filtering:", 
-        filteredReferences.map(ref => ({
-          customerName: ref.customerName,
-          accountName: ref.accountName
-        }))
-      )
     }
 
     // If no references match the filters, return empty array
@@ -89,23 +83,58 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
     console.log(`Sending ${filteredReferences.length} references to AI for ranking`)
     
     // Use the specified AI provider to find relevant references
+    let initialResults: ReferenceResult[] = []
+    
     try {
-      if (aiProvider === "openai") {
-        return await generateReferencesWithOpenAI(description, filteredReferences)
+      // Step 3: Get initial matches using the specified AI provider
+      if (aiProvider === "openai" && isProviderConfigured("openai")) {
+        initialResults = await generateReferencesWithOpenAI(description, filteredReferences)
       } else {
-        return await generateReferencesWithAnthropic(description, filteredReferences)
+        initialResults = await generateReferencesWithAnthropic(description, filteredReferences)
       }
+      
+      // Step 4: Refine the results with a second AI pass if we have results and Anthropic is configured
+      if (initialResults.length > 0 && isProviderConfigured("anthropic")) {
+        console.log("Refining search results to identify key highlights...")
+        try {
+          const refinedResults = await refineSearchResults(description, initialResults)
+          console.log(`Refined ${refinedResults.length} results with highlights`)
+          
+          // Debug: Log a minimal summary of each result's highlights
+          refinedResults.forEach((result, idx) => {
+            console.log(`Result ${idx} (${result.customerName}): ${result.confidence}% confidence, ${result.highlights?.length || 0} highlights`)
+          })
+          
+          return refinedResults
+        } catch (refineError) {
+          console.error("Error during refinement stage:", refineError)
+          // If refinement fails, return the initial results
+          return initialResults
+        }
+      }
+      
+      return initialResults
+      
     } catch (error) {
       console.error(`Error with ${aiProvider}:`, error)
       // Fall back to other provider if one fails
       try {
-        if (aiProvider === "openai") {
+        if (aiProvider === "openai" && isProviderConfigured("anthropic")) {
           console.log("Falling back to Anthropic...")
-          return await generateReferencesWithAnthropic(description, filteredReferences)
-        } else {
+          initialResults = await generateReferencesWithAnthropic(description, filteredReferences)
+        } else if (isProviderConfigured("openai")) {
           console.log("Falling back to OpenAI...")
-          return await generateReferencesWithOpenAI(description, filteredReferences)
+          initialResults = await generateReferencesWithOpenAI(description, filteredReferences)
         }
+        
+        // Try to refine with the fallback results if we have them
+        if (initialResults.length > 0 && isProviderConfigured("anthropic")) {
+          console.log("Refining fallback search results...")
+          const refinedResults = await refineSearchResults(description, initialResults)
+          return refinedResults
+        }
+        
+        return initialResults
       } catch (fallbackError) {
         console.error("Fallback provider also failed:", fallbackError)
         // If both AI providers fail, fall back to keyword matching
