@@ -1,8 +1,11 @@
+// src/lib/types.ts
+
 export interface ReferenceFilter {
-  industry?: string
-  marketSegment?: string
-  useCase?: string
-  crmType?: string
+  industry: string
+  marketSegment: string
+  useCase: string
+  crmType: string
+  company?: string // Added company filter
 }
 
 // Update the ReferenceRequest interface to include aiProvider
@@ -33,4 +36,3 @@ export interface CustomerReference {
 export interface ReferenceResult extends CustomerReference {
   confidence: number
 }
-

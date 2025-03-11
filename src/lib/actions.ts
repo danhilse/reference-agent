@@ -4,12 +4,19 @@ import type { CustomerReference, ReferenceRequest, ReferenceResult } from "./typ
 import { customerReferences } from "./data"
 import { generateReferencesWithAnthropic, generateReferencesWithOpenAI } from "./ai"
 import { generateMockResults } from "./mock-data"
+import { interpretRequest } from "./interpreter"  // Import the new interpreter
 
-// Update the findReferences function to use the specified AI provider
+// Update the findReferences function to use the request interpreter
 export async function findReferences(request: ReferenceRequest): Promise<ReferenceResult[]> {
-  const { description, filters, demoMode, aiProvider = "anthropic" } = request
-
   try {
+    // Step 1: First interpret and enhance the request
+    const enhancedRequest = await interpretRequest(request)
+    
+    // Step 2: Extract the enhanced parameters
+    const { description, filters, demoMode, aiProvider = "anthropic" } = enhancedRequest
+    
+    console.log("Final request filters for search:", filters)
+
     // If demo mode is enabled, return mock results with a small delay
     if (demoMode) {
       await new Promise((resolve) => setTimeout(resolve, 1500))
@@ -23,36 +30,64 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
 
     // Filter references based on user-selected filters
     let filteredReferences = customerReferences.filter((ref) => ref.approvedForPublicUse)
+    console.log(`Starting with ${filteredReferences.length} approved references`)
 
-    if (filters.industry) {
+    if (filters.industry && filters.industry.trim() !== '') {
       filteredReferences = filteredReferences.filter(
         (ref) => ref.industry.toLowerCase() === filters.industry!.toLowerCase(),
       )
+      console.log(`After industry filter (${filters.industry}): ${filteredReferences.length} references`)
     }
 
-    if (filters.marketSegment) {
+    if (filters.marketSegment && filters.marketSegment.trim() !== '') {
       filteredReferences = filteredReferences.filter(
         (ref) => ref.marketSegment.toLowerCase() === filters.marketSegment!.toLowerCase(),
       )
+      console.log(`After market segment filter (${filters.marketSegment}): ${filteredReferences.length} references`)
     }
 
-    if (filters.useCase) {
+    if (filters.useCase && filters.useCase.trim() !== '') {
       filteredReferences = filteredReferences.filter(
         (ref) => ref.useCase.toLowerCase() === filters.useCase!.toLowerCase()
       )
+      console.log(`After use case filter (${filters.useCase}): ${filteredReferences.length} references`)
     }
 
-    if (filters.crmType) {
+    if (filters.crmType && filters.crmType.trim() !== '') {
       filteredReferences = filteredReferences.filter(
         (ref) => ref.crm.toLowerCase() === filters.crmType!.toLowerCase()
+      )
+      console.log(`After CRM type filter (${filters.crmType}): ${filteredReferences.length} references`)
+    }
+    
+    // New: Filter by company if provided
+    if (filters.company && filters.company.trim() !== '') {
+      console.log("Filtering by company:", filters.company)
+      const beforeCount = filteredReferences.length
+      filteredReferences = filteredReferences.filter(
+        (ref) => 
+          ref.customerName.toLowerCase().includes(filters.company!.toLowerCase()) ||
+          ref.accountName.toLowerCase().includes(filters.company!.toLowerCase())
+      )
+      console.log(`After company filter (${filters.company}): ${filteredReferences.length} references (reduced from ${beforeCount})`)
+      
+      // Debug: Log the remaining references to verify company filtering
+      console.log("References after company filtering:", 
+        filteredReferences.map(ref => ({
+          customerName: ref.customerName,
+          accountName: ref.accountName
+        }))
       )
     }
 
     // If no references match the filters, return empty array
     if (filteredReferences.length === 0) {
+      console.log("No references match the filters, returning empty array")
       return []
     }
 
+    console.log(`Sending ${filteredReferences.length} references to AI for ranking`)
+    
     // Use the specified AI provider to find relevant references
     try {
       if (aiProvider === "openai") {
@@ -89,7 +124,8 @@ function fallbackKeywordMatching(description: string, references: CustomerRefere
   const keywords = description.toLowerCase().split(/\s+/).filter(word => word.length > 3)
 
   const results = references.map((ref) => {
-    const refText = `${ref.referenceDetail} ${ref.useCase} ${ref.capability}`.toLowerCase()
+    // Include more reference fields for better matching
+    const refText = `${ref.referenceDetail} ${ref.useCase} ${ref.capability} ${ref.customerName}`.toLowerCase()
 
     // Count matches and calculate a confidence score
     let matchCount = 0

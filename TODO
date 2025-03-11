@@ -7,12 +7,13 @@
     - Typos
     - Abbreviations
     - Implied Filters (including from "Company")
+    - TODO: optimal search formatting for request (reduce fluff?
 - search
     - filter
+        - possibly a filter only mode that skips LLM?
     - search
-    
 - final comparison
-    - clean double quotes
+    - clean double quotes and ?'s
     - ratings
     - key phrases
     - sort

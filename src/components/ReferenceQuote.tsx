@@ -19,7 +19,7 @@ interface ReferenceQuoteProps {
 
 export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
   const [copied, setCopied] = useState(false);
-  const [showMetadata, setShowMetadata] = useState(true);
+  const [showMetadata, setShowMetadata] = useState(false);
 
   // Confidence styling for both badge and border
   const getConfidenceStyles = () => {
