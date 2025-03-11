@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import ReferenceSearch from "~/components/reference-search";
-import ReferenceSearchRedesigned from "~/components/ReferenceSearchRedesigned";
 import { Switch } from "~/components/ui/switch";
 import { Label } from "~/components/ui/label";
 import { Info } from "lucide-react";
@@ -110,7 +109,6 @@ export default function Home() {
             </div>
           </div>
           <ReferenceSearch demoMode={demoMode} aiProvider={aiProvider} />
-          {/* <ReferenceSearchRedesigned /> */}
         </div>
       )}
     </main>
