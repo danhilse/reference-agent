@@ -1,12 +1,18 @@
 - change to filter icon
-- mobile/small screen
-- dissapear placeholder on focus 
-- fading mask for results
-- clean double quotes
-- limit, load more
 - analytics -> google sheets
 
 
-// Backend
-- must be able to say "From Company" and get those results!
-- - return a "key words" that highlight the match in bold.
+// Flow
+- interpretation
+    - Typos
+    - Abbreviations
+    - Implied Filters (including from "Company")
+- search
+    - filter
+    - search
+    
+- final comparison
+    - clean double quotes
+    - ratings
+    - key phrases
+    - sort

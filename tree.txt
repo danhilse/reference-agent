@@ -1,5 +1,7 @@
 .
+├── CLAUDE.md
 ├── README.md
+├── TODO
 ├── components.json
 ├── next-env.d.ts
 ├── next.config.js
@@ -8,7 +10,9 @@
 ├── postcss.config.js
 ├── prettier.config.js
 ├── public
-│   └── favicon.ico
+│   ├── favicon.ico
+│   ├── loading_logo 2.svg
+│   └── loading_logo.svg
 ├── src
 │   ├── app
 │   │   ├── layout.tsx
@@ -19,6 +23,7 @@
 │   │   │   ├── FilterChipsInput.tsx
 │   │   │   └── RotatingPlaceholder.tsx
 │   │   ├── ReferenceQuote.tsx
+│   │   ├── ReferenceSearchRedesigned.tsx
 │   │   ├── RotatingPlaceholder.tsx
 │   │   ├── reference-search.tsx
 │   │   ├── theme-provider.tsx
@@ -31,6 +36,7 @@
 │   │       ├── card.tsx
 │   │       ├── command.tsx
 │   │       ├── dialog.tsx
+│   │       ├── hover-card.tsx
 │   │       ├── label.tsx
 │   │       ├── popover.tsx
 │   │       ├── select.tsx
@@ -38,8 +44,11 @@
 │   │       ├── textarea.tsx
 │   │       └── tooltip.tsx
 │   ├── constants
-│   │   └── example-queries.ts
+│   │   ├── example-queries.ts
+│   │   └── filterData.ts
 │   ├── env.js
+│   ├── hooks
+│   │   └── useFilters.tsx
 │   ├── lib
 │   │   ├── actions.ts
 │   │   ├── ai-config.ts
@@ -54,4 +63,4 @@
 ├── tree.txt
 └── tsconfig.json
 
-10 directories, 45 files
+11 directories, 53 files
