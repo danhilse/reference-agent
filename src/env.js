@@ -6,7 +6,7 @@ export const env = createEnv({
    * Specify your server-side environment variables schema here. This way you can ensure the app
    * isn't built with invalid env vars.
    */
-  server: {
+  server: { 
     NODE_ENV: z.enum(["development", "test", "production"]),
     ANTHROPIC_API_KEY: z.string().min(1),
     OPENAI_API_KEY: z.string().min(1),
