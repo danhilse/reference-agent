@@ -9,6 +9,12 @@ export interface RefinedReferenceResult extends ReferenceResult {
   revisedConfidence?: number;  // Optional revised confidence score
 }
 
+interface RefinementResult {
+  id: number;
+  revisedConfidence: number;
+  highlights: string[];
+}
+
 /**
  * Refines search results by re-evaluating relevance and identifying key phrases
  * based on the original search request.
@@ -16,7 +22,7 @@ export interface RefinedReferenceResult extends ReferenceResult {
 export async function refineSearchResults(
   originalRequest: string,
   results: ReferenceResult[],
-  limit: number = 5
+  limit = 5
 ): Promise<RefinedReferenceResult[]> {
   try {
     // If no results, return empty array
@@ -87,18 +93,18 @@ Return ONLY a valid JSON array with NO additional text, explanation, or markdown
       temperature: 0.1,  // Low temperature for consistent results
       maxTokens: aiConfig.anthropic.maxTokens,
     });
-
+      const refinementResults = JSON.parse(text) as RefinementResult[];
     // Parse the response
     try {
       // Log the raw response for debugging (just the first 500 chars)
       console.log("Raw refinement response preview:", text.substring(0, 500) + (text.length > 500 ? "..." : ""));
       
-      const refinementResults = JSON.parse(text);
+      const refinementResults = JSON.parse(text) as RefinementResult[];
       
       // Map the refinement results back to the original reference objects
       const refinedReferences = results.map((originalRef, idx) => {
         // Look for the refinement result with matching ID
-        const refinement = refinementResults.find((r: any) => r.id === idx);
+        const refinement = refinementResults.find((r: RefinementResult) => r.id === idx);
         
         if (!refinement) {
           console.log(`No refinement found for reference ${idx} (${originalRef.customerName}), using original`);

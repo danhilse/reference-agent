@@ -75,7 +75,7 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   // Helper to get filter color
   const getFilterColor = (filterId: FilterCategories): string => {
     const category = filterData.find((cat) => cat.id === filterId);
-    return category?.color || "#00babe";
+    return category?.color ?? "#00babe";
   };
 
   // Custom filter toggle function that also closes the menu

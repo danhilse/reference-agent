@@ -36,28 +36,28 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
 
     if (filters.industry && filters.industry.trim() !== '') {
       filteredReferences = filteredReferences.filter(
-        (ref) => ref.industry.toLowerCase() === filters.industry!.toLowerCase(),
+        (ref) => ref.industry.toLowerCase() === filters.industry.toLowerCase(),
       )
       console.log(`After industry filter (${filters.industry}): ${filteredReferences.length} references`)
     }
 
     if (filters.marketSegment && filters.marketSegment.trim() !== '') {
       filteredReferences = filteredReferences.filter(
-        (ref) => ref.marketSegment.toLowerCase() === filters.marketSegment!.toLowerCase(),
+        (ref) => ref.marketSegment.toLowerCase() === filters.marketSegment.toLowerCase(),
       )
       console.log(`After market segment filter (${filters.marketSegment}): ${filteredReferences.length} references`)
     }
 
     if (filters.useCase && filters.useCase.trim() !== '') {
       filteredReferences = filteredReferences.filter(
-        (ref) => ref.useCase.toLowerCase() === filters.useCase!.toLowerCase()
+        (ref) => ref.useCase.toLowerCase() === filters.useCase.toLowerCase()
       )
       console.log(`After use case filter (${filters.useCase}): ${filteredReferences.length} references`)
     }
 
     if (filters.crmType && filters.crmType.trim() !== '') {
       filteredReferences = filteredReferences.filter(
-        (ref) => ref.crm.toLowerCase() === filters.crmType!.toLowerCase()
+        (ref) => ref.crm.toLowerCase() === filters.crmType.toLowerCase()
       )
       console.log(`After CRM type filter (${filters.crmType}): ${filteredReferences.length} references`)
     }
@@ -102,7 +102,7 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
           
           // Debug: Log a minimal summary of each result's highlights
           refinedResults.forEach((result, idx) => {
-            console.log(`Result ${idx} (${result.customerName}): ${result.confidence}% confidence, ${result.highlights?.length || 0} highlights`)
+            console.log(`Result ${idx} (${result.customerName}): ${result.confidence}% confidence, ${result.highlights?.length ?? 0} highlights`)
           })
           
           return refinedResults

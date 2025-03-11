@@ -19,7 +19,7 @@ export async function interpretRequest(
   
   try {
     // Step 1: Expand abbreviations in the description
-    let improvedDescription = expandAbbreviations(request.description);
+    const improvedDescription = expandAbbreviations(request.description);
     console.log("After abbreviation expansion:", improvedDescription);
     
     // Step 2: Use AI to improve the request and infer filters
@@ -28,11 +28,11 @@ export async function interpretRequest(
     // Step 3: Combine existing filters with inferred filters from AI
     // User-provided filters take precedence over inferred ones
     const inferredFilters: ReferenceFilter = { 
-      industry: request.filters.industry || '',
-      marketSegment: request.filters.marketSegment || '',
-      useCase: request.filters.useCase || '',
-      crmType: request.filters.crmType || '',
-      company: request.filters.company || ''
+      industry: request.filters.industry ?? '',
+      marketSegment: request.filters.marketSegment ?? '',
+      useCase: request.filters.useCase ?? '',
+      crmType: request.filters.crmType ?? '',
+      company: request.filters.company ?? ''
     };
     
     // Only add inferred industry filter if it wasn't already set by the user
@@ -99,7 +99,7 @@ function expandAbbreviations(description: string): string {
     const regex = new RegExp(`\\b${abbr}\\b`, 'gi');
     
     // Replace the abbreviation with its expansion
-    expandedDescription = expandedDescription.replace(regex, expansion);
+    expandedDescription = expandedDescription.replace(regex, String(expansion));
   });
   
   return expandedDescription;
@@ -114,11 +114,11 @@ function inferConservativeFilters(
   existingFilters: ReferenceFilter
 ): ReferenceFilter {
   const inferredFilters: ReferenceFilter = { 
-    industry: existingFilters.industry || '',
-    marketSegment: existingFilters.marketSegment || '',
-    useCase: existingFilters.useCase || '',
-    crmType: existingFilters.crmType || '',
-    company: existingFilters.company || ''
+    industry: existingFilters.industry ?? '',
+    marketSegment: existingFilters.marketSegment ?? '',
+    useCase: existingFilters.useCase ?? '',
+    crmType: existingFilters.crmType ?? '',
+    company: existingFilters.company ?? ''
   };
   
   const lowerDescription = description.toLowerCase();
@@ -163,7 +163,25 @@ function inferConservativeFilters(
 /**
  * Uses AI to enhance the request and infer appropriate filters
  */
-async function enhanceRequestWithAI(description: string) {
+interface AIEnhancementResult {
+  improvedDescription: string;
+  inferredFilters: {
+    industry: string | null;
+    marketSegment: string | null;
+    company: string | null;
+  };
+}
+
+interface AIResponse {
+  improvedDescription: string;
+  inferredFilters: {
+    industry: string | null;
+    marketSegment: string | null;
+    company: string | null;
+  };
+}
+
+async function enhanceRequestWithAI(description: string): Promise<AIEnhancementResult> {
   // Prepare reference data for the AI
   const industries = JSON.stringify(entityList.industries);
   const marketSegments = JSON.stringify(entityList.marketSegments);
@@ -203,7 +221,6 @@ Respond with ONLY a JSON object in this exact format:
 Replace null with the exact string value from the lists above if a filter should be applied.
 Keep as null if no appropriate filter value is found.
 `;
-
   try {
     const { text } = await generateText({
       model: anthropic(aiConfig.anthropic.model),
@@ -212,7 +229,7 @@ Keep as null if no appropriate filter value is found.
       maxTokens: 500,
     });
 
-    const result = JSON.parse(text);
+    const result = JSON.parse(text) as AIResponse;
     console.log("Raw AI interpretation result:", result);
     
     // Validate the filter values
@@ -237,14 +254,16 @@ Keep as null if no appropriate filter value is found.
  * Validates that a filter value is in the allowed values list
  * Handles both string and array values safely
  */
-function validateFilterValue(value: string | string[] | null, allowedValues: string[]): string | undefined {
-  if (!value) return undefined;
+function validateFilterValue(value: string | string[] | null, allowedValues: string[]): string | null {
+  if (!value) return null;
   
   // If value is an array (handle the bug we saw in logs), choose the first item
   if (Array.isArray(value)) {
     console.log("Received array instead of string for filter value:", value);
-    if (value.length === 0) return undefined;
-    value = value[0]; // Take first value if it's an array
+    if (value.length === 0) return null;
+    const firstValue = value[0];
+    if (firstValue === undefined) return null;
+    value = firstValue; // Take first value if it's an array
   }
   
   // Check if the value exactly matches one of the allowed values
@@ -256,5 +275,5 @@ function validateFilterValue(value: string | string[] | null, allowedValues: str
   const lowerValue = value.toLowerCase();
   const match = allowedValues.find(allowed => allowed.toLowerCase() === lowerValue);
   
-  return match;
+  return match ?? null;
 }

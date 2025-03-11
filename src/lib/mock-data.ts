@@ -16,7 +16,7 @@ export function generateMockResults(count: number, filters: ReferenceFilter): Re
   // Apply industry filter if provided
   if (filters.industry && filters.industry.trim() !== '') {
     filteredData = filteredData.filter(
-      ref => ref.industry.toLowerCase() === filters.industry!.toLowerCase()
+      ref => ref.industry.toLowerCase() === filters.industry.toLowerCase()
     );
     console.log(`After industry filter (${filters.industry}): ${filteredData.length} references for mock data`);
   }
@@ -24,7 +24,7 @@ export function generateMockResults(count: number, filters: ReferenceFilter): Re
   // Apply market segment filter if provided
   if (filters.marketSegment && filters.marketSegment.trim() !== '') {
     filteredData = filteredData.filter(
-      ref => ref.marketSegment.toLowerCase() === filters.marketSegment!.toLowerCase()
+      ref => ref.marketSegment.toLowerCase() === filters.marketSegment.toLowerCase()
     );
     console.log(`After market segment filter (${filters.marketSegment}): ${filteredData.length} references for mock data`);
   }
@@ -32,7 +32,7 @@ export function generateMockResults(count: number, filters: ReferenceFilter): Re
   // Apply use case filter if provided
   if (filters.useCase && filters.useCase.trim() !== '') {
     filteredData = filteredData.filter(
-      ref => ref.useCase.toLowerCase() === filters.useCase!.toLowerCase()
+      ref => ref.useCase.toLowerCase() === filters.useCase.toLowerCase()
     );
     console.log(`After use case filter (${filters.useCase}): ${filteredData.length} references for mock data`);
   }
@@ -40,7 +40,7 @@ export function generateMockResults(count: number, filters: ReferenceFilter): Re
   // Apply CRM type filter if provided
   if (filters.crmType && filters.crmType.trim() !== '') {
     filteredData = filteredData.filter(
-      ref => ref.crm.toLowerCase() === filters.crmType!.toLowerCase()
+      ref => ref.crm.toLowerCase() === filters.crmType.toLowerCase()
     );
     console.log(`After CRM type filter (${filters.crmType}): ${filteredData.length} references for mock data`);
   }
@@ -90,8 +90,11 @@ function generateGenericMockResults(count: number): ReferenceResult[] {
   // Randomly select unique references
   while (selectedRefs.length < count && availableRefs.length > 0) {
     const randomIndex = Math.floor(Math.random() * availableRefs.length);
-    selectedRefs.push(availableRefs[randomIndex]);
-    availableRefs.splice(randomIndex, 1);
+    const selectedRef = availableRefs[randomIndex];
+    if (selectedRef) {
+      selectedRefs.push(selectedRef);
+      availableRefs.splice(randomIndex, 1);
+    }
   }
   
   // Convert to ReferenceResult with random confidence scores

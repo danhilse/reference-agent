@@ -237,11 +237,11 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
 
         <blockquote className="relative mb-6 p-10 font-semibold text-gray-700">
           <span className="text-primary-base absolute left-1 top-4 text-4xl opacity-20">
-            "
+            &quot;
           </span>
           {renderHighlightedQuote()}
           <span className="text-primary-base absolute bottom-4 right-1 text-4xl opacity-20">
-            "
+            &quot;
           </span>
         </blockquote>
       </div>
