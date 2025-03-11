@@ -68,7 +68,8 @@ IMPORTANT: Return ONLY the JSON array with NO additional text, explanation, or m
 
     // Parse the response and map back to full reference objects
     try {
-      const parsedMatches = JSON.parse(text)
+      type Match = { id: number; confidence: number }[];
+      const parsedMatches = JSON.parse(text) as Match;
       
       // Transform the minimal matches back to full ReferenceResult objects
       const results = parsedMatches.map((match: { id: number; confidence: number }) => ({
@@ -136,7 +137,8 @@ IMPORTANT: Return ONLY the JSON array with NO additional text, explanation, or m
 
     // Parse the response and map back to full reference objects
     try {
-      const parsedMatches = JSON.parse(text)
+      type Match = { id: number; confidence: number }[];
+      const parsedMatches = JSON.parse(text) as Match;
       
       // Transform the minimal matches back to full ReferenceResult objects
       const results = parsedMatches.map((match: { id: number; confidence: number }) => ({
