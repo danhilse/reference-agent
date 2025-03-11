@@ -59,9 +59,9 @@ const LoadingQuote = ({ delay, skipAnimation }: LoadingQuoteProps) => {
 
         {/* Quote Content */}
         <div className="relative mb-6 p-10">
-          <span className="text-primary-base absolute -left-1 -top-3 text-4xl opacity-20">
-            "
-          </span>
+          <div className="text-primary-base absolute -left-1 -top-3 text-4xl opacity-20">
+            &ldquo;
+          </div>
           <div className="space-y-3 pl-4">
             <div className="loading-skeleton h-5 w-full rounded" />
             <div className="loading-skeleton h-5 w-11/12 rounded" />
@@ -69,9 +69,9 @@ const LoadingQuote = ({ delay, skipAnimation }: LoadingQuoteProps) => {
             <div className="loading-skeleton h-5 w-10/12 rounded" />
             <div className="loading-skeleton h-5 w-8/12 rounded" />
           </div>
-          <span className="text-primary-base absolute -bottom-3 -right-1 text-4xl opacity-20">
-            "
-          </span>
+          <div className="text-primary-base absolute -bottom-3 -right-1 text-4xl opacity-20">
+            &rdquo;
+          </div>
         </div>
       </div>
 
