@@ -37,6 +37,7 @@ interface FilterChipsInputProps {
   filtersHook: ReturnType<typeof useFilters>;
   onFocus?: () => void; // Prop for handling focus
   onBlur?: () => void; // Prop for handling blur
+  collapseFilterButton?: boolean; // Control whether the filter button text collapses
 }
 
 const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
@@ -47,6 +48,7 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   filtersHook,
   onFocus,
   onBlur,
+  collapseFilterButton = false, // Default to false - always show text
 }) => {
   const { filters, toggleFilter, removeFilter, hasFilters } = filtersHook;
 
@@ -93,6 +95,27 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
   const handleBlur = () => {
     setIsFocused(false);
     if (onBlur) onBlur();
+  };
+
+  // Handle key press events for textarea
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // If Enter is pressed without Shift, submit the form
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent default (newline)
+      setIsFocused(false);
+
+      // Programmatically remove focus from the textarea
+      textareaRef.current?.blur();
+
+      // Find the parent form and submit it
+      const form = textareaRef.current?.closest("form");
+      if (form) {
+        form.dispatchEvent(
+          new Event("submit", { cancelable: true, bubbles: true }),
+        );
+      }
+    }
+    // If Shift+Enter is pressed, allow default behavior (new line)
   };
 
   // Handle placeholder changes from RotatingPlaceholder
@@ -143,6 +166,7 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
         required={required}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
       />
 
       {/* Custom placeholder overlay - show when input is empty (regardless of focus) */}
@@ -218,9 +242,14 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
               variant="ghost"
               size="xs"
               className={cn(
-                "h-6 rounded-full border border-transparent px-1 text-xs transition-all duration-300 hover:bg-white hover:text-gray-500",
+                "h-6 rounded-full border border-transparent px-1 text-xs text-gray-400 opacity-60 transition-all duration-300 hover:bg-white hover:text-gray-500",
                 (isHoveringFilter || mainPopoverOpen) &&
-                  "border-gray-300 bg-gray-100 pr-2 text-gray-500",
+                  "border-gray-300 bg-gray-100 text-gray-500 opacity-100",
+                // Always apply right padding when not collapsing or when hovering/open
+                (!collapseFilterButton ||
+                  isHoveringFilter ||
+                  mainPopoverOpen) &&
+                  "pr-2",
               )}
               onMouseEnter={() => setIsHoveringFilter(true)}
               onMouseLeave={() => {
@@ -239,9 +268,11 @@ const FilterChipsInput: React.FC<FilterChipsInputProps> = ({
               <span
                 className={cn(
                   "duration-400 overflow-hidden whitespace-nowrap transition-all",
-                  isHoveringFilter || mainPopoverOpen
-                    ? "ml-1 max-w-24 opacity-100"
-                    : "w-0 opacity-0",
+                  collapseFilterButton
+                    ? isHoveringFilter || mainPopoverOpen
+                      ? "ml-1 max-w-24 opacity-100"
+                      : "w-0 opacity-0"
+                    : "ml-1 max-w-24 opacity-100", // Always show when not collapsing
                 )}
               >
                 Add Filter

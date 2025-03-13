@@ -1,19 +1,9 @@
-- change to filter icon
+- login / password protection
+
+
+///
+
 - analytics -> google sheets
-
-
-// Flow
-- interpretation
-    - Typos
-    - Abbreviations
-    - Implied Filters (including from "Company")
-    - TODO: optimal search formatting for request (reduce fluff?
-- search
-    - filter
-        - possibly a filter only mode that skips LLM?
-    - search
-- final comparison
-    - clean double quotes and ?'s
-    - ratings
-    - key phrases
-    - sort
+- FORMATTING -- remove ? and double quotes
+- Enhance query interpretation to distinguish between "quotes," "case studies," and "reviews"
+- Salesforce API Integration

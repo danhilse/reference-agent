@@ -15,9 +15,13 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
     const enhancedRequest = await interpretRequest(request)
     
     // Step 2: Extract the enhanced parameters
-    const { description, filters, demoMode, aiProvider = "anthropic" } = enhancedRequest
+    const { description, filters, demoMode, aiProvider = "anthropic", optimizedQuery } = enhancedRequest
+    
+    // Store the original request description for refinement later
+    const originalRequest = request.description
     
     console.log("Final request filters for search:", filters)
+    console.log("Using optimized query for search:", optimizedQuery)
 
     // If demo mode is enabled, return mock results with a small delay
     if (demoMode) {
@@ -86,18 +90,19 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
     let initialResults: ReferenceResult[] = []
     
     try {
-      // Step 3: Get initial matches using the specified AI provider
+      // Step 3: Get initial matches using the specified AI provider and the OPTIMIZED query
       if (aiProvider === "openai" && isProviderConfigured("openai")) {
-        initialResults = await generateReferencesWithOpenAI(description, filteredReferences)
+        initialResults = await generateReferencesWithOpenAI(optimizedQuery, filteredReferences)
       } else {
-        initialResults = await generateReferencesWithAnthropic(description, filteredReferences)
+        initialResults = await generateReferencesWithAnthropic(optimizedQuery, filteredReferences)
       }
       
       // Step 4: Refine the results with a second AI pass if we have results and Anthropic is configured
+      // Important: Use the ORIGINAL request for refinement to ensure matching against user's intent
       if (initialResults.length > 0 && isProviderConfigured("anthropic")) {
         console.log("Refining search results to identify key highlights...")
         try {
-          const refinedResults = await refineSearchResults(description, initialResults)
+          const refinedResults = await refineSearchResults(originalRequest, initialResults)
           console.log(`Refined ${refinedResults.length} results with highlights`)
           
           // Debug: Log a minimal summary of each result's highlights
@@ -121,16 +126,17 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
       try {
         if (aiProvider === "openai" && isProviderConfigured("anthropic")) {
           console.log("Falling back to Anthropic...")
-          initialResults = await generateReferencesWithAnthropic(description, filteredReferences)
+          initialResults = await generateReferencesWithAnthropic(optimizedQuery, filteredReferences)
         } else if (isProviderConfigured("openai")) {
           console.log("Falling back to OpenAI...")
-          initialResults = await generateReferencesWithOpenAI(description, filteredReferences)
+          initialResults = await generateReferencesWithOpenAI(optimizedQuery, filteredReferences)
         }
         
         // Try to refine with the fallback results if we have them
+        // Again, use the ORIGINAL request for refinement
         if (initialResults.length > 0 && isProviderConfigured("anthropic")) {
           console.log("Refining fallback search results...")
-          const refinedResults = await refineSearchResults(description, initialResults)
+          const refinedResults = await refineSearchResults(originalRequest, initialResults)
           return refinedResults
         }
         

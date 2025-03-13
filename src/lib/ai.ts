@@ -40,9 +40,11 @@ Available customer references:
 ${referencesJson}
 
 I need you to:
-1. Identify the 3-5 most relevant customer references that best match the sales rep's needs.
+1. Identify the 3-8 most relevant customer references that best match the sales rep's needs.
 2. Assign a confidence score (0-100) to each match, indicating how well it addresses the request.
 3. Only include references that are truly relevant to the request.
+4. When matching features, prioritize references that mention THE EXACT FEATURE SET, even if there are minor variations in terminology (e.g., "Advance Social" vs "Advanced Social Media").
+5. Consider the entire context of the request rather than focusing on individual keywords.
 
 Return your response as a JSON array of objects with these properties:
 - id: The reference ID (number)
@@ -56,7 +58,7 @@ Example output format:
 ]
 
 IMPORTANT: Return ONLY the JSON array with NO additional text, explanation, or markdown formatting.
-`
+`;
 
     // Call Anthropic API using config values
     const { text } = await generateText({
@@ -109,7 +111,7 @@ Available customer references:
 ${referencesJson}
 
 I need you to:
-1. Identify the 3-5 most relevant customer references that best match the sales rep's needs.
+1. Identify the 3-8 most relevant customer references that best match the sales rep's needs.
 2. Assign a confidence score (0-100) to each match, indicating how well it addresses the request.
 3. Only include references that are truly relevant to the request.
 

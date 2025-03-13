@@ -18,6 +18,10 @@ interface RefinementResult {
 /**
  * Refines search results by re-evaluating relevance and identifying key phrases
  * based on the original search request.
+ * 
+ * @param originalRequest The user's original unmodified request (not the optimized query)
+ * @param results The search results to refine
+ * @param limit Maximum number of results to return
  */
 export async function refineSearchResults(
   originalRequest: string,
@@ -28,7 +32,7 @@ export async function refineSearchResults(
     // If no results, return empty array
     if (!results.length) return [];
     
-    console.log(`Refining ${results.length} search results with original request: "${originalRequest}"`);
+    console.log(`Refining ${results.length} search results with original user request: "${originalRequest}"`);
     
     // Prepare the results for the refinement prompt - use array index as ID
     const referencesForPrompt = results.map((ref, index) => ({
@@ -50,8 +54,12 @@ You are an expert in analyzing customer references for Act-On Software, a market
 The sales rep's original search request was: "${originalRequest}"
 
 I need you to analyze these search results to:
-1. Re-evaluate the confidence score (0-100) for each reference based on how well it truly addresses the request
+1. Re-evaluate the confidence score (0-100) for each reference based on how well it truly addresses the original request
 2. Identify 1-3 very concise key phrases within each quote that directly address the search request
+3. Pay special attention to references that mention complete feature sets matching the request
+4. Give higher confidence to references that mention the exact features requested, even if spelling or terminology varies slightly (e.g., "Advance Social" vs "Advanced Social Media")
+
+IMPORTANT: Use the sales rep's original request as the basis for evaluation, not any inferred or optimized version.
 
 Here are the search results you need to analyze:
 ${referencesJson}
@@ -59,7 +67,7 @@ ${referencesJson}
 For each reference, provide:
 - id: The reference ID from the input
 - revisedConfidence: Your refined confidence score (0-100)
-- highlights: An array of 1-3 specific text fragments from the quote that best match the search request
+- highlights: An array of 0-3 specific text fragments from the quote that best match the search request
 
 CRITICAL GUIDELINES FOR HIGHLIGHTS:
 1. Each highlight MUST be an EXACT substring that appears in the quote without any changes
@@ -68,6 +76,8 @@ CRITICAL GUIDELINES FOR HIGHLIGHTS:
 4. For results, focus on the specific outcome, not explanatory text
 5. Verify that each highlight string exists in the quote EXACTLY as provided
 6. Do not modify the text in any way - not even punctuation or capitalization
+7. Choose fragments that best address what the sales rep was actually looking for in their original request
+8. When searching for features, prioritize exact feature mentions even with slight terminology differences
 
 Return your analysis as a JSON array in this format:
 [
@@ -93,7 +103,7 @@ Return ONLY a valid JSON array with NO additional text, explanation, or markdown
       temperature: 0.1,  // Low temperature for consistent results
       maxTokens: aiConfig.anthropic.maxTokens,
     });
-      const refinementResults = JSON.parse(text) as RefinementResult[];
+    
     // Parse the response
     try {
       // Log the raw response for debugging (just the first 500 chars)
