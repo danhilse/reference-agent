@@ -10,6 +10,7 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "test", "production"]),
     ANTHROPIC_API_KEY: z.string().min(1),
     OPENAI_API_KEY: z.string().min(1),
+    FULL_PASS: z.string().min(1),
   },
 
   /**
@@ -29,6 +30,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    FULL_PASS: process.env.FULL_PASS,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

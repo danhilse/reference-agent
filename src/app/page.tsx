@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import ReferenceSearch from "~/components/reference-search";
 import { Switch } from "~/components/ui/switch";
@@ -13,6 +13,16 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
+// Import the server action
+import { validateDemoPassword, isDemoDisabled } from "~/lib/auth-actions";
+import { PasswordTooltip } from "~/components/ui/PasswordTooltip";
+
+// TypeScript interface for our password tooltip
+interface PasswordSubmitResult {
+  success: boolean;
+  error: string | null;
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   // Demo mode state with default value of true
@@ -21,8 +31,35 @@ export default function Home() {
     "anthropic",
   );
 
+  // State for password protection
+  const [showPasswordTooltip, setShowPasswordTooltip] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Ref for demo toggle
+  const demoToggleRef = useRef<HTMLDivElement>(null);
+
+  // Check if the user has already authenticated from a cookie
   useEffect(() => {
-    // Simulate loading for 3 seconds
+    const checkAuth = async () => {
+      try {
+        const disabled = await isDemoDisabled();
+        if (disabled) {
+          setDemoMode(false);
+        }
+      } catch (error) {
+        console.error("Error checking authentication status:", error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    void checkAuth();
+  }, []);
+
+  useEffect(() => {
+    // Simulate loading for 1.8 seconds
     const loadingTimer = setTimeout(() => {
       setLoading(false);
     }, 1800);
@@ -35,6 +72,58 @@ export default function Home() {
     setLoading(false);
   };
 
+  // Handle demo mode toggle
+  const handleDemoToggle = (checked: boolean) => {
+    if (checked) {
+      // Turning demo mode ON doesn't require password
+      setDemoMode(true);
+    } else {
+      // Turning demo mode OFF requires password
+      setShowPasswordTooltip(true);
+    }
+  };
+
+  // Handle password submission with server-side validation
+  const handlePasswordSubmit = async (formData: FormData) => {
+    setIsAuthenticating(true);
+    setPasswordError(null);
+
+    try {
+      const result = await validateDemoPassword(formData);
+
+      if (result.success) {
+        setDemoMode(false);
+        setShowPasswordTooltip(false);
+        return true;
+      } else {
+        setPasswordError(result.error ?? "Authentication failed");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error validating password:", error);
+      setPasswordError("An unexpected error occurred. Please try again.");
+      return false;
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  // Show loading state while checking auth status
+  if (isCheckingAuth) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[var(--app-background)]">
+        <Image
+          src="/loading_logo 2.svg"
+          alt="Act-On Loading"
+          width={200}
+          height={200}
+          priority
+          className="animate-pulse"
+        />
+      </div>
+    );
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--app-background)]">
       {/* Fixed position demo mode toggle */}
@@ -42,11 +131,11 @@ export default function Home() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center space-x-2">
+              <div ref={demoToggleRef} className="flex items-center space-x-2">
                 <Switch
                   id="demo-mode"
                   checked={demoMode}
-                  onCheckedChange={setDemoMode}
+                  onCheckedChange={handleDemoToggle}
                 />
                 <Label
                   htmlFor="demo-mode"
@@ -65,6 +154,18 @@ export default function Home() {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
+        {/* Password tooltip */}
+        {showPasswordTooltip && (
+          <PasswordTooltip
+            isOpen={showPasswordTooltip}
+            onClose={() => setShowPasswordTooltip(false)}
+            onSubmit={handlePasswordSubmit}
+            isSubmitting={isAuthenticating}
+            error={passwordError}
+            anchor={demoToggleRef}
+          />
+        )}
       </div>
 
       {loading ? (
@@ -72,14 +173,6 @@ export default function Home() {
           className="flex cursor-pointer flex-col items-center justify-center"
           onClick={handleSkip}
         >
-          {/* <Image
-            src="/loading_logo.svg"
-            alt="Act-On Loading"
-            width={500}
-            height={500}
-            priority
-            className="absolute animate-pulse"
-          /> */}
           <Image
             src="/loading_logo 2.svg"
             alt="Act-On Loading"
