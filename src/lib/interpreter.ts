@@ -105,12 +105,12 @@ function expandAbbreviations(description: string): string {
     
     // Sort abbreviations by length (longest first) to handle multi-word abbreviations properly
     const sortedAbbreviations = [...abbreviations].sort(
-      (a, b) => b[0].length - a[0].length
+      (a, b) => (b[0]?.length ?? 0) - (a[0]?.length ?? 0)
     );
     
     for (const [abbr, expansion] of sortedAbbreviations) {
       // Skip if the expansion is already present in the description
-      if (description.toLowerCase().includes(expansion.toLowerCase())) {
+      if (expansion && description.toLowerCase().includes(expansion.toLowerCase())) {
         console.log(`Skipping expansion of '${abbr}' as '${expansion}' is already in the text`);
         continue;
       }
@@ -222,7 +222,7 @@ async function enhanceRequestWithAI(
   
   // Prepare current filter info to help the AI understand what's already selected
   const selectedFilters = Object.entries(currentFilters)
-    .filter(([_, value]) => value && value.trim() !== '')
+    .filter(([_, value]) => typeof value === 'string' && value.trim() !== '')
     .map(([key, value]) => `${key}: "${value}"`)
     .join(", ");
   
