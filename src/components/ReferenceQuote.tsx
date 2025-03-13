@@ -162,7 +162,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
   return (
     <div className="overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md">
       {/* Quote Section - Main focus */}
-      <div className="p-6">
+      <div className="px-6 py-6 sm:px-0">
         {/* Compact Metadata Row */}
         <div className="pb-10">
           <div className="flex items-center justify-between border-border pb-4 text-sm">
@@ -235,7 +235,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
           )}
         </div>
 
-        <blockquote className="relative mb-6 p-10 font-semibold text-gray-700">
+        <blockquote className="relative mb-6 p-10 font-semibold text-gray-700 sm:p-0">
           <span className="text-primary-base absolute left-1 top-4 text-4xl opacity-20">
             &quot;
           </span>

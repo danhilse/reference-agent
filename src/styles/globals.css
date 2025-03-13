@@ -125,8 +125,13 @@
   .container-acton {
     max-width: 1400px;
     width: 100%;
-    padding: 0 24px;
+    padding: 0;
     margin: 0 auto;
+  }
+  @media (min-width: 640px) {
+    .container-acton {
+      padding: 0 24px;
+    }
   }
   .container-acton-full {
     padding: 0 24px;
