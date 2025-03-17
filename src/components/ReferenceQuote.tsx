@@ -160,7 +160,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md">
+    <div className="overflow-hidden rounded-lg border bg-white px-8 shadow-sm transition-all duration-200 hover:shadow-md">
       {/* Quote Section - Main focus */}
       <div className="px-6 py-6 sm:px-0">
         {/* Compact Metadata Row */}
@@ -235,7 +235,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
           )}
         </div>
 
-        <blockquote className="relative mb-6 p-10 font-semibold text-gray-700 sm:p-0">
+        <blockquote className="relative mb-6 p-10 font-semibold text-gray-700">
           <span className="text-primary-base absolute left-1 top-4 text-4xl opacity-20">
             &quot;
           </span>
@@ -247,7 +247,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
       </div>
 
       {/* Simplified Action Footer */}
-      <div className="flex items-center justify-between border-t border-border px-6 py-3">
+      <div className="flex items-center justify-between border-t border-border px-0 py-3">
         <div className="flex gap-3">
           {result.caseStudyLink && (
             <Button
