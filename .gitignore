@@ -44,3 +44,5 @@ yarn-error.log*
 
 # idea files
 .idea
+
+sf_config.json

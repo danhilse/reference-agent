@@ -4,7 +4,7 @@ import { env } from "~/env.js"
 export const aiConfig = {
   anthropic: {
     apiKey: env.ANTHROPIC_API_KEY,
-    model: "claude-3-haiku-20240307",
+    model: "claude-3-7-sonnet-latest",
     maxTokens: 1000,
     temperature: 0.2,
   },
