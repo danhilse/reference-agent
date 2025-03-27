@@ -13,7 +13,7 @@ An intelligent AI-powered tool that helps sales teams find relevant customer quo
 - **Confidence Scoring**: View confidence percentages showing how well each reference matches your request
 - **Smart Highlighting**: Automatically highlights the most relevant parts of each quote
 - **Intelligent Request Interpretation**: Expands abbreviations and optimizes search queries
-- **Multiple AI Models**: Choose between Anthropic or OpenAI for different needs
+- **Multiple AI Models**: Choose between Anthropic Claude, OpenAI, or Google Gemini
 - **Easy Copying**: Copy individual references or all matches with a single click
 - **Demo Mode**: Test functionality instantly without consuming API quota
 
@@ -21,8 +21,8 @@ An intelligent AI-powered tool that helps sales teams find relevant customer quo
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/act-on-reference-agent.git
-cd act-on-reference-agent
+git clone https://github.com/act-on/reference-agent.git
+cd reference-agent
 
 # Install dependencies
 npm install
@@ -36,6 +36,36 @@ npm run dev
 ```
 
 Visit `http://localhost:3000` to view the application.
+
+## Development
+
+```bash
+# Start development server with Turbo
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+
+# Preview production build locally
+npm run preview
+
+# Lint code
+npm run lint
+npm run lint:fix
+
+# Type check
+npm run typecheck
+
+# Run both lint and type checks
+npm run check
+
+# Format code
+npm run format:write
+npm run format:check
+```
 
 ## Usage Guide
 
@@ -57,32 +87,11 @@ Link to Case Study or G2 Review: [Case Study Link]
 Link to Slide: [Reference Slide Link]
 ```
 
-### Example Reference Data
-
-```json
-{
-  "customerName": "Good Funding",
-  "accountName": "Good Funding",
-  "referenceType": "G2 Review Quote",
-  "approvedForPublicUse": true,
-  "useCase": "Ease of Use",
-  "capability": "Reporting",
-  "caseStudyLink": "https://www.g2.com/products/act-on/reviews/act-on-review-7413273",
-  "crm": "SalesForce",
-  "customerContact": "Jenny Alonzo",
-  "referenceDetail": "I love how user-friendly the entire platform is! It syncs beautifully with our Salesforce instance, provides all the reporting I need to track downstream KPIs, and whenever I have trouble or need some technical assistance, the Act-On team works with me until we have a resolution. In my 18-year career, I have used many different email platforms that do a lot of \"fancy\" things, but for my business marketing needs, this tool does everything I need it to do without being overly complicated. I recommend it to industry peers all the time.",
-  "referenceSlideLink": "",
-  "industry": "Accounting/Financial Services",
-  "marketSegment": "SMB",
-  "verified": "Salesforce"
-}
-```
-
 ## How It Works
 
 1. **Request Enhancement**: The system interprets your request, expanding abbreviations and optimizing search terms
 2. **Filtering**: Your query is matched against filtered customer references from approved sources
-3. **AI Ranking**: References are scored based on relevance to your request using Claude or GPT
+3. **AI Ranking**: References are scored based on relevance to your request using Claude, GPT, or Gemini
 4. **Result Refinement**: A second AI pass identifies key highlights and adjusts confidence scores
 5. **Presentation**: Top matches are displayed with highlighted text for easy scanning
 
@@ -99,6 +108,7 @@ This project uses the [T3 Stack](https://create.t3.gg/):
 ### AI Models
 - **Anthropic Claude** (default): Excellent for nuanced understanding of customer references
 - **OpenAI GPT-4o**: Alternative model with different strengths
+- **Google Gemini**: Additional model option
 
 ## Environment Variables
 
@@ -108,14 +118,16 @@ Create a `.env` file with the following variables:
 # AI API Keys (at least one is required)
 ANTHROPIC_API_KEY=your_anthropic_api_key
 OPENAI_API_KEY=your_openai_api_key
+GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+FULL_PASS=your_password_for_admin_access
 ```
 
-## Success Criteria
+## Future Development
 
-- Regular usage by the sales team (target: 5+ uses per week per rep)
-- Positive feedback on relevance of responses and ease of use
-- Measurable impact on sales conversations and outcomes
-- Increased integration of customer voice in sales presentations
+- Analytics integration with Google Sheets
+- Enhanced query interpretation to distinguish between quotes, case studies, and reviews
+- Salesforce API integration
+- Sorting results by match percentage
 
 ## License
 
