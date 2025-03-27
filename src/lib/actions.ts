@@ -2,7 +2,7 @@
 
 import type { CustomerReference, ReferenceRequest, ReferenceResult } from "./types"
 import { customerReferences } from "./data"
-import { generateReferencesWithAnthropic, generateReferencesWithOpenAI } from "./ai"
+import { generateReferencesWithAnthropic, generateReferencesWithOpenAI, generateReferencesWithGemini } from "./ai"
 import { generateMockResults } from "./mock-data"
 import { interpretRequest } from "./interpreter"
 import { refineSearchResults } from "./refine-results"
@@ -93,6 +93,8 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
       // Step 3: Get initial matches using the specified AI provider and the OPTIMIZED query
       if (aiProvider === "openai" && isProviderConfigured("openai")) {
         initialResults = await generateReferencesWithOpenAI(optimizedQuery, filteredReferences)
+      } else if (aiProvider === "gemini" && isProviderConfigured("gemini")) {
+        initialResults = await generateReferencesWithGemini(optimizedQuery, filteredReferences)
       } else {
         initialResults = await generateReferencesWithAnthropic(optimizedQuery, filteredReferences)
       }
@@ -124,12 +126,16 @@ export async function findReferences(request: ReferenceRequest): Promise<Referen
       console.error(`Error with ${aiProvider}:`, error)
       // Fall back to other provider if one fails
       try {
-        if (aiProvider === "openai" && isProviderConfigured("anthropic")) {
+        // Try to fall back to any available provider
+        if (aiProvider !== "anthropic" && isProviderConfigured("anthropic")) {
           console.log("Falling back to Anthropic...")
           initialResults = await generateReferencesWithAnthropic(optimizedQuery, filteredReferences)
-        } else if (isProviderConfigured("openai")) {
+        } else if (aiProvider !== "openai" && isProviderConfigured("openai")) {
           console.log("Falling back to OpenAI...")
           initialResults = await generateReferencesWithOpenAI(optimizedQuery, filteredReferences)
+        } else if (aiProvider !== "gemini" && isProviderConfigured("gemini")) {
+          console.log("Falling back to Gemini...")
+          initialResults = await generateReferencesWithGemini(optimizedQuery, filteredReferences)
         }
         
         // Try to refine with the fallback results if we have them

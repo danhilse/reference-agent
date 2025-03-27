@@ -12,6 +12,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { ModelSelector } from "~/components/ui/ModelSelector";
+import type { AIProvider } from "~/lib/types";
 
 // Import the server action
 import { validateDemoPassword, isDemoDisabled } from "~/lib/auth-actions";
@@ -27,9 +29,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   // Demo mode state with default value of true
   const [demoMode, setDemoMode] = useState(true);
-  const [aiProvider, setAiProvider] = useState<"anthropic" | "openai">(
-    "anthropic",
-  );
+  const [aiProvider, setAiProvider] = useState<AIProvider>("anthropic");
 
   // State for password protection
   const [showPasswordTooltip, setShowPasswordTooltip] = useState(false);
@@ -126,7 +126,18 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--app-background)]">
-      {/* Fixed position demo mode toggle */}
+      {/* Model selector in top left */}
+      <div className="absolute left-4 top-4 z-50 rounded p-2">
+        <div className="flex items-center space-x-2">
+          <Label className="text-sm text-muted-foreground">AI Model:</Label>
+          <ModelSelector
+            value={aiProvider}
+            onChange={(value) => setAiProvider(value)}
+          />
+        </div>
+      </div>
+
+      {/* Demo mode toggle in top right */}
       <div className="absolute right-4 top-4 z-50 flex items-center space-x-2 rounded p-2">
         <TooltipProvider>
           <Tooltip>

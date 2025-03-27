@@ -1,6 +1,7 @@
 import { generateText } from "ai"
 import { anthropic } from "@ai-sdk/anthropic"
 import { openai } from "@ai-sdk/openai"
+import { google } from "@ai-sdk/google"
 import type { CustomerReference, ReferenceResult } from "./types"
 import { env } from "~/env.js"
 import { aiConfig } from "./ai-config"
@@ -155,6 +156,77 @@ IMPORTANT: Return ONLY the JSON array with NO additional text, explanation, or m
     }
   } catch (error) {
     console.error("Error calling OpenAI:", error)
+    throw error
+  }
+}
+
+// Function to generate references using Google's Gemini
+export async function generateReferencesWithGemini(
+  description: string,
+  references: CustomerReference[],
+): Promise<ReferenceResult[]> {
+  try {
+    // Prepare simplified reference data for AI
+    const simplifiedReferences = prepareReferencesForAI(references)
+    
+    // Format the simplified references as JSON string
+    const referencesJson = JSON.stringify(simplifiedReferences, null, 2)
+
+    // Create a prompt for Gemini
+    const prompt = `
+You are an expert sales assistant for Act-On Software, a marketing automation platform.
+Your task is to find the most relevant customer references based on this sales rep's request: "${description}".
+
+Available customer references:
+${referencesJson}
+
+I need you to:
+1. Identify the 3-8 most relevant customer references that best match the sales rep's needs.
+2. Assign a confidence score (0-100) to each match, indicating how well it addresses the request.
+3. Only include references that are truly relevant to the request.
+4. When matching features, prioritize references that mention THE EXACT FEATURE SET, even if there are minor variations in terminology.
+5. Consider the entire context of the request rather than focusing on individual keywords.
+
+Return your response as a JSON array of objects with these properties:
+- id: The reference ID (number)
+- confidence: Your confidence score (number between 0-100)
+
+Example output format:
+[
+  {"id": 2, "confidence": 95},
+  {"id": 0, "confidence": 82},
+  {"id": 5, "confidence": 78}
+]
+
+IMPORTANT: Return ONLY the JSON array with NO additional text, explanation, or markdown formatting.
+`;
+
+    // Call Gemini API using config values
+    const { text } = await generateText({
+      model: google(aiConfig.gemini.model),
+      prompt,
+      temperature: aiConfig.gemini.temperature,
+      maxTokens: aiConfig.gemini.maxTokens,
+    })
+
+    // Parse the response and map back to full reference objects
+    try {
+      type Match = { id: number; confidence: number }[];
+      const parsedMatches = JSON.parse(text) as Match;
+      
+      // Transform the minimal matches back to full ReferenceResult objects
+      const results = parsedMatches.map((match: { id: number; confidence: number }) => ({
+        ...references[match.id],
+        confidence: match.confidence
+      })) as ReferenceResult[]
+      
+      return results
+    } catch (error) {
+      console.error("Failed to parse Gemini response:", error, "Raw response:", text)
+      return []
+    }
+  } catch (error) {
+    console.error("Error calling Gemini:", error)
     throw error
   }
 }

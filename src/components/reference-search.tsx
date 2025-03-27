@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { findReferences } from "~/lib/actions";
-import type { ReferenceResult } from "~/lib/types";
+import type { ReferenceResult, AIProvider } from "~/lib/types";
 import { Switch } from "~/components/ui/switch";
 import { ReferenceQuote } from "~/components/ReferenceQuote";
 import { LoadingState } from "~/components/ui/LoadingState";
@@ -28,7 +28,7 @@ import {
 
 interface ReferenceSearchProps {
   demoMode: boolean;
-  aiProvider: "anthropic" | "openai";
+  aiProvider: AIProvider;
 }
 
 export default function ImprovedReferenceSearch({

@@ -11,6 +11,8 @@ export const env = createEnv({
     ANTHROPIC_API_KEY: z.string().min(1),
     OPENAI_API_KEY: z.string().min(1),
     FULL_PASS: z.string().min(1),
+    GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
+
   },
 
   /**
@@ -31,6 +33,8 @@ export const env = createEnv({
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     FULL_PASS: process.env.FULL_PASS,
+    GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
