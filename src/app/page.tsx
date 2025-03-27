@@ -5,58 +5,37 @@ import Image from "next/image";
 import ReferenceSearch from "~/components/reference-search";
 import { Switch } from "~/components/ui/switch";
 import { Label } from "~/components/ui/label";
-import { Info } from "lucide-react";
+import { Info, LogOut } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-
-// Import the server action
-import { validateDemoPassword, isDemoDisabled } from "~/lib/auth-actions";
-import { PasswordTooltip } from "~/components/ui/PasswordTooltip";
-
-// TypeScript interface for our password tooltip
-interface PasswordSubmitResult {
-  success: boolean;
-  error: string | null;
-}
+import { OktaLoginTooltip } from "~/components/ui/OktaLoginTooltip";
+import { useAuth } from "~/contexts/AuthContext";
+import { Button } from "~/components/ui/button";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  // Demo mode state with default value of true
-  const [demoMode, setDemoMode] = useState(true);
   const [aiProvider, setAiProvider] = useState<"anthropic" | "openai">(
     "anthropic",
   );
 
-  // State for password protection
-  const [showPasswordTooltip, setShowPasswordTooltip] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  // Get authentication state from our context
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    demoMode,
+    setDemoMode,
+    logout,
+  } = useAuth();
+
+  // State for the Okta login tooltip
+  const [showLoginTooltip, setShowLoginTooltip] = useState(false);
 
   // Ref for demo toggle
   const demoToggleRef = useRef<HTMLDivElement>(null);
-
-  // Check if the user has already authenticated from a cookie
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const disabled = await isDemoDisabled();
-        if (disabled) {
-          setDemoMode(false);
-        }
-      } catch (error) {
-        console.error("Error checking authentication status:", error);
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
-
-    void checkAuth();
-  }, []);
 
   useEffect(() => {
     // Simulate loading for 1.8 seconds
@@ -75,41 +54,16 @@ export default function Home() {
   // Handle demo mode toggle
   const handleDemoToggle = (checked: boolean) => {
     if (checked) {
-      // Turning demo mode ON doesn't require password
+      // Turning demo mode ON doesn't require authentication
       setDemoMode(true);
     } else {
-      // Turning demo mode OFF requires password
-      setShowPasswordTooltip(true);
-    }
-  };
-
-  // Handle password submission with server-side validation
-  const handlePasswordSubmit = async (formData: FormData) => {
-    setIsAuthenticating(true);
-    setPasswordError(null);
-
-    try {
-      const result = await validateDemoPassword(formData);
-
-      if (result.success) {
-        setDemoMode(false);
-        setShowPasswordTooltip(false);
-        return true;
-      } else {
-        setPasswordError(result.error ?? "Authentication failed");
-        return false;
-      }
-    } catch (error) {
-      console.error("Error validating password:", error);
-      setPasswordError("An unexpected error occurred. Please try again.");
-      return false;
-    } finally {
-      setIsAuthenticating(false);
+      // Turning demo mode OFF requires authentication
+      setShowLoginTooltip(true);
     }
   };
 
   // Show loading state while checking auth status
-  if (isCheckingAuth) {
+  if (loading || authLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[var(--app-background)]">
         <Image
@@ -126,8 +80,21 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--app-background)]">
-      {/* Fixed position demo mode toggle */}
-      <div className="absolute right-4 top-4 z-50 flex items-center space-x-2 rounded p-2">
+      {/* Fixed position demo mode toggle and user status */}
+      <div className="absolute right-4 top-4 z-50 flex items-center space-x-4 rounded p-2">
+        {/* Show logout button if authenticated */}
+        {isAuthenticated && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1 text-sm"
+            onClick={() => void logout()}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sign Out
+          </Button>
+        )}
+
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -148,21 +115,19 @@ export default function Home() {
             </TooltipTrigger>
             <TooltipContent>
               <p>
-                Generate realistic reference examples instantly without calling
-                the AI API
+                {demoMode
+                  ? "Currently showing example data. Toggle off and sign in to access real customer references."
+                  : "Using authenticated data. Toggle on to use example data instead."}
               </p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
 
-        {/* Password tooltip */}
-        {showPasswordTooltip && (
-          <PasswordTooltip
-            isOpen={showPasswordTooltip}
-            onClose={() => setShowPasswordTooltip(false)}
-            onSubmit={handlePasswordSubmit}
-            isSubmitting={isAuthenticating}
-            error={passwordError}
+        {/* Okta login tooltip */}
+        {showLoginTooltip && (
+          <OktaLoginTooltip
+            isOpen={showLoginTooltip}
+            onClose={() => setShowLoginTooltip(false)}
             anchor={demoToggleRef}
           />
         )}
@@ -198,6 +163,11 @@ export default function Home() {
               </h1>
               <p className="mt-1 text-[var(--text-light)]">
                 Find customer quotes and references for sales conversations
+                {!demoMode && (
+                  <span className="ml-1 font-semibold text-[var(--primary-base)]">
+                    (Authenticated)
+                  </span>
+                )}
               </p>
             </div>
           </div>

@@ -175,17 +175,7 @@ def get_salesforce_data(config_file=None, save_output=True):
 if __name__ == "__main__":
     # Option 1: Use a config file for credentials (more secure than hardcoding)
     config_file = "sf_config.json"
-    
-    # Example config file format:
-    """
-    {
-        "client_id": "3MVG99OxTyEMCQ3gcPr9LJRZ0Kg5JmhrzTaAMgboLP7GvzEgYG9KFnhR6zig8vyqqcaMD3bARLQPvbF.nUMd1",
-        "client_secret": "01545E102E8BB72FFDC964703650ADA7C4A2FC1E369DC2938B17F415414DC380",
-        "username": "your_salesforce_username",
-        "password": "your_salesforce_password",
-        "report_id": "00OVP000002IlDp2AK"
-    }
-    """
+
     
     # Option 2: Use environment variables (better for production)
     # Make sure to set these environment variables:

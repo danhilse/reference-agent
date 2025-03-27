@@ -1,6 +1,9 @@
 import "~/styles/globals.css";
 import { type Metadata } from "next";
 import { Open_Sans } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
+import { AuthProvider } from "~/contexts/AuthContext";
+import { getAuthSession } from "~/lib/auth";
 
 // Initialize the Open Sans font
 const openSans = Open_Sans({
@@ -17,12 +20,18 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getAuthSession();
+
   return (
     <html lang="en" className={openSans.className}>
-      <body>{children}</body>
+      <body>
+        <SessionProvider session={session}>
+          <AuthProvider>{children}</AuthProvider>
+        </SessionProvider>
+      </body>
     </html>
   );
 }
