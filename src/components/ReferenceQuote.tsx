@@ -1,3 +1,4 @@
+// ReferenceQuote.tsx - Fixed version
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Info } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -61,10 +62,13 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
     console.log(
       `ReferenceQuote ${index} - customerName: ${result.customerName}`,
     );
-    console.log(`ReferenceQuote ${index} - highlights:`, result.highlights);
+
+    // Extract highlight text strings from the highlight objects
+    const highlightTexts = result.highlights?.map((h) => h.text) ?? [];
+    console.log(`ReferenceQuote ${index} - highlight texts:`, highlightTexts);
 
     // If no highlights are available or if they're empty, return the original text
-    if (!result.highlights || result.highlights.length === 0) {
+    if (!highlightTexts || highlightTexts.length === 0) {
       console.log(`ReferenceQuote ${index} - No highlights available`);
       return (
         <p className="pl-4 text-lg italic leading-relaxed text-gray-500">
@@ -74,12 +78,12 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
     }
 
     // Check for exact matches in the text
-    const exactMatches = result.highlights.filter((highlight) =>
+    const exactMatches = highlightTexts.filter((highlight) =>
       result.referenceDetail.includes(highlight),
     );
 
     console.log(
-      `ReferenceQuote ${index} - Found ${exactMatches.length} exact matches out of ${result.highlights.length} highlights`,
+      `ReferenceQuote ${index} - Found ${exactMatches.length} exact matches out of ${highlightTexts.length} highlights`,
     );
 
     if (exactMatches.length === 0) {
@@ -89,7 +93,7 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
       );
       console.log(
         `ReferenceQuote ${index} - First highlight:`,
-        result.highlights[0],
+        highlightTexts[0],
       );
       return (
         <p className="pl-4 text-lg italic leading-relaxed text-gray-500">

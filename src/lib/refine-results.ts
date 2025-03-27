@@ -5,7 +5,7 @@ import type { ReferenceResult } from "./types";
 import { aiConfig } from "./ai-config";
 
 export interface RefinedReferenceResult extends ReferenceResult {
-  highlights?: string[];  // Array of key phrases to highlight
+  highlights?: Array<{ text: string; relevance: string; }>;  // Match the format in ReferenceResult
   revisedConfidence?: number;  // Optional revised confidence score
 }
 
@@ -27,7 +27,7 @@ export async function refineSearchResults(
   originalRequest: string,
   results: ReferenceResult[],
   limit = 5
-): Promise<RefinedReferenceResult[]> {
+): Promise<ReferenceResult[]> {
   try {
     // If no results, return empty array
     if (!results.length) return [];
@@ -121,21 +121,23 @@ Return ONLY a valid JSON array with NO additional text, explanation, or markdown
           return originalRef;
         }
         
-        // Create the refined reference with highlights
+        // Create the refined reference with highlights in the correct format
         return {
           ...originalRef,
-          highlights: refinement.highlights || [],
+          highlights: refinement.highlights ? 
+            refinement.highlights.map(text => ({ text, relevance: "high" })) : 
+            undefined,
           // Use the revised confidence if available, otherwise keep the original
           confidence: refinement.revisedConfidence || originalRef.confidence
         };
-      }) as RefinedReferenceResult[];
+      });
       
       // Log a more concise summary of the final results
       console.log("Refinement summary:", 
         refinedReferences.map(ref => ({
           customerName: ref.customerName,
           confidence: ref.confidence,
-          highlights: ref.highlights?.map(h => h.substring(0, 30) + (h.length > 30 ? "..." : ""))
+          highlights: ref.highlights?.map(h => h.text.substring(0, 30) + (h.text.length > 30 ? "..." : ""))
         }))
       );
       
@@ -146,11 +148,11 @@ Return ONLY a valid JSON array with NO additional text, explanation, or markdown
     } catch (error) {
       console.error("Failed to parse refinement response:", error, "Raw response:", text);
       // Fall back to the original results if parsing fails
-      return results.slice(0, limit) as RefinedReferenceResult[];
+      return results.slice(0, limit);
     }
   } catch (error) {
     console.error("Error refining search results:", error);
     // Return the original results if refinement fails
-    return results.slice(0, limit) as RefinedReferenceResult[];
+    return results.slice(0, limit);
   }
 }
