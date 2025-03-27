@@ -12,33 +12,39 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { OktaLoginTooltip } from "~/components/ui/OktaLoginTooltip";
-import { useAuth } from "~/contexts/AuthContext";
 import { Button } from "~/components/ui/button";
+import { useSession, signOut } from "next-auth/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import { LoginButton } from "~/components/ui/LoginButton";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [aiProvider, setAiProvider] = useState<"anthropic" | "openai">(
     "anthropic",
   );
+  const [demoMode, setDemoMode] = useState(true);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
-  // Get authentication state from our context
-  const {
-    isAuthenticated,
-    isLoading: authLoading,
-    demoMode,
-    setDemoMode,
-    logout,
-  } = useAuth();
+  // Get session from NextAuth
+  const { data: session, status } = useSession();
+  const isAuthenticated = !!session?.user;
+  const isLoading = status === "loading";
 
-  // State for the Okta login tooltip
-  const [showLoginTooltip, setShowLoginTooltip] = useState(false);
-
-  // Ref for demo toggle
-  const demoToggleRef = useRef<HTMLDivElement>(null);
-
+  // Effect to set demo mode based on authentication
   useEffect(() => {
-    // Simulate loading for 1.8 seconds
+    if (isAuthenticated) {
+      setDemoMode(false);
+    }
+  }, [isAuthenticated]);
+
+  // Initial loading animation
+  useEffect(() => {
     const loadingTimer = setTimeout(() => {
       setLoading(false);
     }, 1800);
@@ -58,12 +64,18 @@ export default function Home() {
       setDemoMode(true);
     } else {
       // Turning demo mode OFF requires authentication
-      setShowLoginTooltip(true);
+      setShowLoginDialog(true);
     }
   };
 
+  // Handle logout
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: window.location.origin });
+    setDemoMode(true);
+  };
+
   // Show loading state while checking auth status
-  if (loading || authLoading) {
+  if (loading || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[var(--app-background)]">
         <Image
@@ -88,7 +100,7 @@ export default function Home() {
             variant="outline"
             size="sm"
             className="gap-1 text-sm"
-            onClick={() => void logout()}
+            onClick={handleLogout}
           >
             <LogOut className="h-3.5 w-3.5" />
             Sign Out
@@ -98,7 +110,7 @@ export default function Home() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div ref={demoToggleRef} className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                 <Switch
                   id="demo-mode"
                   checked={demoMode}
@@ -123,14 +135,20 @@ export default function Home() {
           </Tooltip>
         </TooltipProvider>
 
-        {/* Okta login tooltip */}
-        {showLoginTooltip && (
-          <OktaLoginTooltip
-            isOpen={showLoginTooltip}
-            onClose={() => setShowLoginTooltip(false)}
-            anchor={demoToggleRef}
-          />
-        )}
+        {/* Login Dialog */}
+        <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Sign in to Act-On</DialogTitle>
+              <DialogDescription>
+                Use your Act-On credentials to access customer reference data.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4">
+              <LoginButton onClose={() => setShowLoginDialog(false)} />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {loading ? (

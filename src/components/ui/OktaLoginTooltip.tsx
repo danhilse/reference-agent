@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Popover, PopoverContent, PopoverArrow } from "~/components/ui/popover";
 import { Button } from "~/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -25,8 +24,12 @@ export function OktaLoginTooltip({
     setError(null);
 
     try {
-      await signIn("okta", { callbackUrl: window.location.href });
-      // The page will redirect to Okta, no need to handle success here
+      // Using the next-auth signIn function with the provider name matching what's in the route.ts file
+      await signIn("okta", {
+        callbackUrl: window.location.origin,
+        redirect: true,
+      });
+      // Since redirect is true, no need to handle success here as the page will redirect
     } catch (err) {
       console.error("Authentication error:", err);
       setError("Failed to authenticate with Okta. Please try again.");
@@ -34,16 +37,32 @@ export function OktaLoginTooltip({
     }
   };
 
+  // If not open, don't render anything
+  if (!isOpen) return null;
+
+  // Calculate position based on anchor element
+  const position = anchor.current
+    ? {
+        top:
+          anchor.current.getBoundingClientRect().bottom + window.scrollY + 10,
+        right:
+          window.innerWidth -
+          (anchor.current.getBoundingClientRect().right + window.scrollX),
+      }
+    : { top: 0, right: 0 };
+
   return (
-    <Popover open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <PopoverContent
-        align="end"
-        className="w-80 p-4"
-        alignOffset={-10}
-        side="bottom"
-        sideOffset={10}
-        // This is how we position relative to the ref
-        anchorRef={anchor}
+    <>
+      {/* Backdrop for clicking outside */}
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+
+      {/* Tooltip content */}
+      <div
+        className="fixed z-50 w-80 rounded-md border bg-popover p-4 text-popover-foreground shadow-md"
+        style={{
+          top: `${position.top}px`,
+          right: `${position.right}px`,
+        }}
       >
         <div className="flex flex-col space-y-3">
           <h3 className="text-lg font-semibold">Use Real Data</h3>
@@ -74,9 +93,10 @@ export function OktaLoginTooltip({
             </Button>
           </div>
 
-          <PopoverArrow className="fill-background" />
+          {/* Custom arrow styling */}
+          <div className="absolute -top-2 right-5 h-3 w-3 rotate-45 transform bg-popover" />
         </div>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </>
   );
 }

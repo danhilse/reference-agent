@@ -1,9 +1,8 @@
 import "~/styles/globals.css";
 import { type Metadata } from "next";
 import { Open_Sans } from "next/font/google";
-import { SessionProvider } from "next-auth/react";
-import { AuthProvider } from "~/contexts/AuthContext";
 import { getAuthSession } from "~/lib/auth";
+import Providers from "~/components/Providers";
 
 // Initialize the Open Sans font
 const openSans = Open_Sans({
@@ -28,9 +27,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={openSans.className}>
       <body>
-        <SessionProvider session={session}>
-          <AuthProvider>{children}</AuthProvider>
-        </SessionProvider>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   );
