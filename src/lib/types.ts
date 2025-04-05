@@ -12,6 +12,9 @@ export interface FilterValues {
   company?: string;
 }
 
+// Reference filter type alias
+export type ReferenceFilter = FilterValues;
+
 // Reference request interface
 export interface ReferenceRequest {
   description: string;
