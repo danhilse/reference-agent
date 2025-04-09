@@ -1,4 +1,4 @@
-// ReferenceQuote.tsx - Fixed version
+// ReferenceQuote.tsx - Fixed version with proper highlighting
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Info } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -148,13 +148,20 @@ export function ReferenceQuote({ result, index }: ReferenceQuoteProps) {
       `ReferenceQuote ${index} - Created ${segments.length} segments`,
     );
 
-    // Render the segments
+    // Render the segments with enhanced highlighting styling
     return (
       <p className="pl-4 text-lg italic leading-relaxed text-gray-500">
         {segments.map((segment, i) => (
           <span
             key={i}
-            className={segment.isHighlight ? "px-0.5 font-bold text-black" : ""}
+            className={
+              segment.isHighlight ? "px-1 font-extrabold text-black" : ""
+            }
+            style={
+              segment.isHighlight
+                ? { textShadow: "0 0 0.2px black" }
+                : undefined
+            }
           >
             {segment.text}
           </span>
