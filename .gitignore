@@ -46,3 +46,4 @@ yarn-error.log*
 .idea
 
 sf_config.json
+gather_report.py
